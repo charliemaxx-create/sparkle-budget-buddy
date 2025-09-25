@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      savings_goals: {
+        Row: {
+          category: string | null
+          color: string | null
+          created_at: string
+          current_amount: number
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          target_amount: number
+          target_date: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          color?: string | null
+          created_at?: string
+          current_amount?: number
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          target_amount: number
+          target_date?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          color?: string | null
+          created_at?: string
+          current_amount?: number
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          target_amount?: number
+          target_date?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

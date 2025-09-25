@@ -5,6 +5,8 @@ import { BudgetCard } from '@/components/BudgetCard';
 import { DebtCard } from '@/components/DebtCard';
 import { SpendingChart } from '@/components/SpendingChart';
 import { AddTransactionModal } from '@/components/AddTransactionModal';
+import { SavingsGoalCard } from '@/components/SavingsGoalCard';
+import { AddSavingsGoalModal } from '@/components/AddSavingsGoalModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -56,9 +58,49 @@ const spendingData = [
   { category: 'Bills & Utilities', amount: 480, color: '#8B5CF6' },
 ];
 
+const savingsGoals = [
+  {
+    id: '1',
+    name: 'Emergency Fund',
+    description: '6 months of expenses',
+    target_amount: 15000,
+    current_amount: 8500,
+    target_date: '2024-12-31',
+    category: 'Emergency Fund',
+    icon: '🛡️',
+    color: '#10B981',
+    is_active: true
+  },
+  {
+    id: '2', 
+    name: 'Vacation to Europe',
+    description: 'Dream vacation with family',
+    target_amount: 5000,
+    current_amount: 1200,
+    target_date: '2024-07-01',
+    category: 'Vacation',
+    icon: '✈️',
+    color: '#6366F1',
+    is_active: true
+  },
+  {
+    id: '3',
+    name: 'New Car Down Payment',
+    description: 'Save for reliable transportation',
+    target_amount: 8000,
+    current_amount: 3200,
+    target_date: '2024-09-15',
+    category: 'Car',
+    icon: '🚗',
+    color: '#F59E0B',
+    is_active: true
+  }
+];
+
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
+  const [isAddSavingsGoalOpen, setIsAddSavingsGoalOpen] = useState(false);
 
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
@@ -209,6 +251,43 @@ const Index = () => {
     </div>
   );
 
+  const renderSavingsGoals = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Savings Goals</h2>
+        <Button className="btn-gradient" onClick={() => setIsAddSavingsGoalOpen(true)}>
+          Add Savings Goal
+        </Button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {savingsGoals.map((goal) => (
+          <SavingsGoalCard 
+            key={goal.id} 
+            goal={goal}
+            onAddMoney={(goalId, amount) => {
+              console.log(`Adding $${amount} to goal ${goalId}`);
+              // This will be implemented with Supabase integration
+            }}
+          />
+        ))}
+      </div>
+      {savingsGoals.length === 0 && (
+        <Card className="card-elevated animate-fade-in">
+          <CardContent className="text-center py-12">
+            <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No savings goals yet</h3>
+            <p className="text-muted-foreground mb-4">
+              Start saving for your dreams! Create your first savings goal.
+            </p>
+            <Button className="btn-gradient" onClick={() => setIsAddSavingsGoalOpen(true)}>
+              Create Your First Goal
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
   const renderProfile = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Profile & Settings</h2>
@@ -232,6 +311,8 @@ const Index = () => {
     switch (activeTab) {
       case 'budgets':
         return renderBudgets();
+      case 'savings':
+        return renderSavingsGoals();
       case 'debts':
         return renderDebts();
       case 'transactions':
@@ -258,6 +339,15 @@ const Index = () => {
       <AddTransactionModal
         isOpen={isAddTransactionOpen}
         onClose={() => setIsAddTransactionOpen(false)}
+      />
+
+      <AddSavingsGoalModal
+        isOpen={isAddSavingsGoalOpen}
+        onClose={() => setIsAddSavingsGoalOpen(false)}
+        onAdd={(goal) => {
+          console.log('Adding new savings goal:', goal);
+          // This will be implemented with Supabase integration
+        }}
       />
     </div>
   );

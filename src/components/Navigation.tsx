@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Wallet, PieChart, TrendingDown, Receipt, Settings, Plus } from 'lucide-react';
+import { Wallet, PieChart, TrendingDown, Receipt, Settings, Plus, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Wallet },
   { id: 'budgets', label: 'Budgets', icon: PieChart },
+  { id: 'savings', label: 'Savings Goals', icon: Target },
   { id: 'debts', label: 'Debts', icon: TrendingDown },
   { id: 'transactions', label: 'Transactions', icon: Receipt },
   { id: 'profile', label: 'Profile', icon: Settings },
