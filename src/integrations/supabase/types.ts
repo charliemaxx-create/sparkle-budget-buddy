@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      recurring_transactions: {
+        Row: {
+          account_id: string | null
+          amount: number
+          category: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          frequency: string
+          id: string
+          is_active: boolean | null
+          last_executed_date: string | null
+          name: string
+          next_execution_date: string
+          start_date: string
+          tags: string[] | null
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          category: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          frequency: string
+          id?: string
+          is_active?: boolean | null
+          last_executed_date?: string | null
+          name: string
+          next_execution_date: string
+          start_date: string
+          tags?: string[] | null
+          type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          last_executed_date?: string | null
+          name?: string
+          next_execution_date?: string
+          start_date?: string
+          tags?: string[] | null
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       savings_goals: {
         Row: {
           category: string | null
@@ -67,7 +127,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_next_execution_date: {
+        Args: { current_date_param: string; frequency_param: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
