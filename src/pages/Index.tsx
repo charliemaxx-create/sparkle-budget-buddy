@@ -20,21 +20,14 @@ import { BudgetStrategyManager } from '@/components/budgeting/BudgetStrategyMana
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, DollarSign, Target, RotateCcw, Plus } from 'lucide-react'; // Added Plus icon
+import { TrendingUp, TrendingDown, DollarSign, Target, RotateCcw, Plus } from 'lucide-react';
 import { useDebts, useUpsertDebt, useDeleteDebt } from '@/hooks/useDebts';
 import { AddDebtModal } from '@/components/debts/AddDebtModal';
-import { AddAccountModal } from '@/components/AddAccountModal'; // Import AddAccountModal
-import { useAccounts, useUpsertAccount } from '@/hooks/useAccounts'; // Import useAccounts and useUpsertAccount
+import { AddAccountModal } from '@/components/AddAccountModal';
+import { useAccounts, useUpsertAccount } from '@/hooks/useAccounts';
 import type { DebtItem } from '@/services/debts';
-import type { Account } from '@/types'; // Import Account type
-
-// Mock data - these will be replaced by data from useAccounts hook
-// const accounts = [
-//   { id: '1', name: 'Chase Checking', type: 'checking' as const, balance: 4250.75, lastUpdated: '2 hours ago' },
-//   { id: '2', name: 'Savings Account', type: 'savings' as const, balance: 12800.50, lastUpdated: '1 day ago' },
-//   { id: '3', name: 'Credit Card', type: 'credit' as const, balance: -1250.25, lastUpdated: '3 hours ago' },
-//   { id: '4', name: 'Cash Wallet', type: 'cash' as const, balance: 150.00, lastUpdated: '1 week ago' },
-// ];
+import type { Account } from '@/types';
+import { AccountsPage } from './AccountsPage'; // Import the new AccountsPage
 
 const spendingData = [
   { category: 'Food & Dining', amount: 645, color: '#10B981' },
@@ -51,11 +44,11 @@ const Index = () => {
   const [isAddRecurringTransactionOpen, setIsAddRecurringTransactionOpen] = useState(false);
   const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<DebtItem | null>(null);
-  const [isAddAccountOpen, setIsAddAccountOpen] = useState(false); // State for AddAccountModal
-  const [editingAccount, setEditingAccount] = useState<Account | null>(null); // State for editing account
+  const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
-  const { data: accounts = [] } = useAccounts(); // Fetch accounts using hook
-  const upsertAccount = useUpsertAccount(); // Hook for adding/updating accounts
+  const { data: accounts = [] } = useAccounts();
+  const upsertAccount = useUpsertAccount();
 
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
   
@@ -161,23 +154,7 @@ const Index = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Accounts */}
-        <div className="lg:col-span-1">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Accounts</h2>
-            <Button size="sm" className="btn-gradient" onClick={handleAddAccount}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Account
-            </Button>
-          </div>
-          <div className="space-y-4">
-            {accounts.map((account) => (
-              <AccountCard key={account.id} account={account} />
-            ))}
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Insights */}
         <div className="lg:col-span-1 space-y-6">
           <CashflowSummary />
@@ -343,6 +320,8 @@ const Index = () => {
 
   const renderActiveTab = () => {
     switch (activeTab) {
+      case 'accounts': // Render AccountsPage for the 'accounts' tab
+        return <AccountsPage />;
       case 'budgets':
         return renderBudgets();
       case 'savings':
@@ -401,6 +380,7 @@ const Index = () => {
         }}
       />
 
+      {/* AddAccountModal is now managed within AccountsPage, but keeping it here for other potential uses if needed */}
       <AddAccountModal
         isOpen={isAddAccountOpen}
         onClose={handleCloseAccountModal}

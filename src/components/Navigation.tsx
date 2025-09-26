@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Wallet, PieChart, TrendingDown, Receipt, Settings, Plus, Target, RotateCcw } from 'lucide-react';
+import { Wallet, PieChart, TrendingDown, Receipt, Settings, Plus, Target, RotateCcw, Banknote } from 'lucide-react'; // Added Banknote for accounts
 import { Button } from '@/components/ui/button';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Wallet },
+  { id: 'accounts', label: 'Accounts', icon: Banknote }, // New Accounts item
   { id: 'budgets', label: 'Budgets', icon: PieChart },
   { id: 'savings', label: 'Savings Goals', icon: Target },
   { id: 'recurring', label: 'Recurring', icon: RotateCcw },
