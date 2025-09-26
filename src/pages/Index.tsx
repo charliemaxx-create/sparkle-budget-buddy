@@ -7,10 +7,12 @@ import { SpendingChart } from '@/components/SpendingChart';
 import { AddTransactionModal } from '@/components/AddTransactionModal';
 import { SavingsGoalCard } from '@/components/SavingsGoalCard';
 import { AddSavingsGoalModal } from '@/components/AddSavingsGoalModal';
+import { RecurringTransactionCard } from '@/components/RecurringTransactionCard';
+import { AddRecurringTransactionModal } from '@/components/AddRecurringTransactionModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, DollarSign, Target } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Target, RotateCcw } from 'lucide-react';
 
 // Mock data
 const accounts = [
@@ -97,10 +99,70 @@ const savingsGoals = [
   }
 ];
 
+const recurringTransactions = [
+  {
+    id: '1',
+    name: 'Netflix Subscription',
+    description: 'Monthly streaming service',
+    amount: 15.99,
+    type: 'expense' as const,
+    category: 'Entertainment',
+    frequency: 'monthly' as const,
+    start_date: '2024-01-01',
+    next_execution_date: '2025-01-15',
+    last_executed_date: '2024-12-15',
+    is_active: true,
+    tags: ['subscription', 'entertainment']
+  },
+  {
+    id: '2',
+    name: 'Salary',
+    description: 'Monthly salary payment',
+    amount: 5000,
+    type: 'income' as const,
+    category: 'Salary',
+    frequency: 'monthly' as const,
+    start_date: '2024-01-01',
+    next_execution_date: '2025-01-31',
+    last_executed_date: '2024-12-31',
+    is_active: true,
+    tags: ['salary', 'income']
+  },
+  {
+    id: '3',
+    name: 'Rent Payment',
+    description: 'Monthly apartment rent',
+    amount: 1200,
+    type: 'expense' as const,
+    category: 'Bills & Utilities',
+    frequency: 'monthly' as const,
+    start_date: '2024-01-01',
+    next_execution_date: '2025-02-01',
+    last_executed_date: '2025-01-01',
+    is_active: true,
+    tags: ['rent', 'housing']
+  },
+  {
+    id: '4',
+    name: 'Gym Membership',
+    description: 'Annual gym membership',
+    amount: 480,
+    type: 'expense' as const,
+    category: 'Healthcare',
+    frequency: 'yearly' as const,
+    start_date: '2024-03-01',
+    next_execution_date: '2025-03-01',
+    last_executed_date: '2024-03-01',
+    is_active: false,
+    tags: ['fitness', 'health']
+  }
+];
+
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
   const [isAddSavingsGoalOpen, setIsAddSavingsGoalOpen] = useState(false);
+  const [isAddRecurringTransactionOpen, setIsAddRecurringTransactionOpen] = useState(false);
 
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
@@ -288,6 +350,53 @@ const Index = () => {
     </div>
   );
 
+  const renderRecurringTransactions = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Recurring Transactions</h2>
+        <Button className="btn-gradient" onClick={() => setIsAddRecurringTransactionOpen(true)}>
+          Add Recurring Transaction
+        </Button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {recurringTransactions.map((transaction) => (
+          <RecurringTransactionCard 
+            key={transaction.id} 
+            transaction={transaction}
+            onToggleActive={(id, active) => {
+              console.log(`Toggling active status for ${id}: ${active}`);
+              // This will be implemented with Supabase integration
+            }}
+            onEdit={(id) => {
+              console.log(`Editing transaction ${id}`);
+              // This will be implemented with Supabase integration  
+            }}
+            onDelete={(id) => {
+              console.log(`Deleting transaction ${id}`);
+              // This will be implemented with Supabase integration
+            }}
+          />
+        ))}
+      </div>
+      
+      {recurringTransactions.length === 0 && (
+        <Card className="card-elevated animate-fade-in">
+          <CardContent className="text-center py-12">
+            <RotateCcw className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No recurring transactions yet</h3>
+            <p className="text-muted-foreground mb-4">
+              Automate your finances! Set up recurring income and expenses.
+            </p>
+            <Button className="btn-gradient" onClick={() => setIsAddRecurringTransactionOpen(true)}>
+              Add Your First Recurring Transaction
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+
   const renderProfile = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Profile & Settings</h2>
@@ -313,6 +422,8 @@ const Index = () => {
         return renderBudgets();
       case 'savings':
         return renderSavingsGoals();
+      case 'recurring':
+        return renderRecurringTransactions();
       case 'debts':
         return renderDebts();
       case 'transactions':
@@ -346,6 +457,15 @@ const Index = () => {
         onClose={() => setIsAddSavingsGoalOpen(false)}
         onAdd={(goal) => {
           console.log('Adding new savings goal:', goal);
+          // This will be implemented with Supabase integration
+        }}
+      />
+
+      <AddRecurringTransactionModal
+        isOpen={isAddRecurringTransactionOpen}
+        onClose={() => setIsAddRecurringTransactionOpen(false)}
+        onAdd={(transaction) => {
+          console.log('Adding new recurring transaction:', transaction);
           // This will be implemented with Supabase integration
         }}
       />
