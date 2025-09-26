@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BudgetStrategySelector } from './BudgetStrategySelector';
 import { FiftyThirtyTwentyBudget } from './FiftyThirtyTwentyBudget';
 import { EnvelopeBudget } from './EnvelopeBudget';
@@ -9,14 +9,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Settings, TrendingUp, Plus, Edit, Trash2 } from 'lucide-react';
-import { AddBudgetCategoryModal } from '../AddBudgetCategoryModal'; // Import the new modal
-import { useUpsertBudget, useDeleteBudget } from '@/hooks/useBudgets'; // Import hooks for budget actions
+import { AddBudgetCategoryModal } from '../AddBudgetCategoryModal';
+import { useUpsertBudget, useDeleteBudget } from '@/hooks/useBudgets';
+import { useBudgetStrategies, useUpsertBudgetStrategy, useSetActiveBudgetStrategy } from '@/hooks/useBudgetStrategies'; // Import new hooks
 import type { BudgetItem } from '@/services/budgets';
+import type { BudgetStrategy as BudgetStrategyTypeFromHook } from '@/hooks/useBudgetStrategies'; // Alias to avoid conflict
 
 type BudgetStrategyType = '50-30-20' | 'envelope' | 'pay-yourself-first' | 'expense-buckets' | 'traditional' | null;
 
 interface BudgetStrategyManagerProps {
-  // Mock data for traditional budgeting - to maintain existing functionality
   budgets?: Array<{
     id: string;
     category: string;
@@ -28,8 +29,11 @@ interface BudgetStrategyManagerProps {
 }
 
 export const BudgetStrategyManager = ({ budgets = [] }: BudgetStrategyManagerProps) => {
-  const [selectedStrategy, setSelectedStrategy] = useState<BudgetStrategyType>('traditional');
-  const [monthlyIncome, setMonthlyIncome] = useState(5000); // Default income
+  const { data: strategies, isLoading: isLoadingStrategies } = useBudgetStrategies();
+  const upsertStrategy = useUpsertBudgetStrategy();
+  const setActiveStrategy = useSetActiveBudgetStrategy();
+
+  const activeStrategy = strategies?.find(s => s.is_active);
   const [showSelector, setShowSelector] = useState(false);
   const [isAddBudgetModalOpen, setIsAddBudgetModalOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<BudgetItem | null>(null);
@@ -38,8 +42,31 @@ export const BudgetStrategyManager = ({ budgets = [] }: BudgetStrategyManagerPro
   const deleteBudget = useDeleteBudget();
 
   const handleStrategyChange = (strategyType: string) => {
-    setSelectedStrategy(strategyType as BudgetStrategyType);
+    // If no active strategy, create one and set it active
+    if (!activeStrategy) {
+      upsertStrategy.mutate({
+        name: `${strategyType} Budget`,
+        strategy_type: strategyType,
+        monthly_income: 5000, // Default income
+        is_active: true,
+      });
+    } else if (activeStrategy.strategy_type !== strategyType) {
+      // If changing strategy, update the active one
+      setActiveStrategy.mutate(activeStrategy.id); // This will set the current active strategy to inactive
+      upsertStrategy.mutate({
+        name: `${strategyType} Budget`,
+        strategy_type: strategyType,
+        monthly_income: activeStrategy.monthly_income, // Keep current income
+        is_active: true,
+      });
+    }
     setShowSelector(false);
+  };
+
+  const handleMonthlyIncomeChange = (newIncome: number) => {
+    if (activeStrategy) {
+      upsertStrategy.mutate({ ...activeStrategy, monthly_income: newIncome });
+    }
   };
 
   const handleSaveBudget = (budget: Omit<BudgetItem, 'spent'> & { id?: string }) => {
@@ -62,8 +89,9 @@ export const BudgetStrategyManager = ({ budgets = [] }: BudgetStrategyManagerPro
     }
   };
 
-  const getStrategyInfo = (strategy: BudgetStrategyType) => {
-    switch (strategy) {
+  const getStrategyInfo = (strategy: BudgetStrategyTypeFromHook | null) => {
+    if (!strategy) return { name: 'Select Strategy', description: 'Choose your budgeting approach' };
+    switch (strategy.strategy_type) {
       case '50-30-20':
         return { name: '50-30-20 Rule', description: 'Simple percentage-based budgeting' };
       case 'envelope':
@@ -79,14 +107,18 @@ export const BudgetStrategyManager = ({ budgets = [] }: BudgetStrategyManagerPro
     }
   };
 
-  const strategyInfo = getStrategyInfo(selectedStrategy);
+  const strategyInfo = getStrategyInfo(activeStrategy || null);
+
+  if (isLoadingStrategies) {
+    return <div className="text-center py-8 text-muted-foreground">Loading budgeting strategies...</div>;
+  }
 
   // Show strategy selector if no strategy is selected or if explicitly requested
-  if (!selectedStrategy || showSelector) {
+  if (!activeStrategy || showSelector) {
     return (
       <div className="space-y-6">
         <BudgetStrategySelector 
-          selectedStrategy={selectedStrategy || undefined}
+          selectedStrategy={activeStrategy?.strategy_type || undefined}
           onSelectStrategy={handleStrategyChange}
         />
       </div>
@@ -95,28 +127,28 @@ export const BudgetStrategyManager = ({ budgets = [] }: BudgetStrategyManagerPro
 
   // Render the selected strategy
   const renderStrategy = () => {
-    switch (selectedStrategy) {
+    switch (activeStrategy.strategy_type) {
       case '50-30-20':
         return (
           <FiftyThirtyTwentyBudget 
-            monthlyIncome={monthlyIncome}
-            onIncomeChange={setMonthlyIncome}
+            monthlyIncome={activeStrategy.monthly_income || 0}
+            onIncomeChange={handleMonthlyIncomeChange}
           />
         );
       case 'envelope':
-        return <EnvelopeBudget monthlyIncome={monthlyIncome} />;
+        return <EnvelopeBudget monthlyIncome={activeStrategy.monthly_income || 0} />;
       case 'pay-yourself-first':
         return (
           <PayYourselfFirstBudget 
-            monthlyIncome={monthlyIncome}
-            onIncomeChange={setMonthlyIncome}
+            monthlyIncome={activeStrategy.monthly_income || 0}
+            onIncomeChange={handleMonthlyIncomeChange}
           />
         );
       case 'expense-buckets':
         return (
           <ExpenseBucketsBudget 
-            monthlyIncome={monthlyIncome}
-            onIncomeChange={setMonthlyIncome}
+            monthlyIncome={activeStrategy.monthly_income || 0}
+            onIncomeChange={handleMonthlyIncomeChange}
           />
         );
       case 'traditional':
