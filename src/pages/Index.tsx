@@ -17,7 +17,7 @@ import { BudgetStrategyManager } from '@/components/budgeting/BudgetStrategyMana
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, DollarSign, Target, Plus, PieChart } from 'lucide-react'; // Added PieChart icon
+import { TrendingUp, TrendingDown, DollarSign, Target, Plus, PieChart } from 'lucide-react';
 import { useDebts, useUpsertDebt, useDeleteDebt } from '@/hooks/useDebts';
 import { AddDebtModal } from '@/components/debts/AddDebtModal';
 import { AddAccountModal } from '@/components/AddAccountModal';
@@ -26,9 +26,9 @@ import type { DebtItem } from '@/services/debts';
 import type { Account } from '@/types';
 import { AccountsPage } from './AccountsPage';
 import { ProfilePreferences } from '@/components/ProfilePreferences';
-import { useCategories } from '@/hooks/useCategories'; // Import useCategories
-import { useTransactions } from '@/hooks/useTransactions'; // Import useTransactions
-import { Progress } from '@/components/ui/progress'; // Import Progress component
+import { useCategories } from '@/hooks/useCategories';
+import { useTransactions } from '@/hooks/useTransactions';
+import { Progress } from '@/components/ui/progress';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -58,8 +58,8 @@ const Index = () => {
   const totalBudgetPercentage = totalBudgetAllocated > 0 ? (totalBudgetSpent / totalBudgetAllocated) * 100 : 0;
   const isTotalBudgetOver = totalBudgetSpent > totalBudgetAllocated;
 
-  const { data: allCategories = [] } = useCategories(); // Fetch all categories
-  const { data: allTransactionsData } = useTransactions(undefined, 1, 1000); // Fetch all transactions
+  const { data: allCategories = [] } = useCategories();
+  const { data: allTransactionsData } = useTransactions(undefined, 1, 1000);
   const allTransactions = allTransactionsData?.items ?? [];
 
   // Memoize spending data for top-tier categories
@@ -237,18 +237,6 @@ const Index = () => {
           <CategoryBreakdown />
         </div>
       </div>
-
-      {/* Debts */}
-      {debts.length > 0 && (
-        <div>
-          <h2 className="text-lg font-semibold mb-4">Debt Tracker</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {debts.map((debt) => (
-              <DebtCard key={debt.id} debt={debt} />
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 
