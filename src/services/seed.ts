@@ -4,9 +4,8 @@ import { listRecurring, upsertRecurring } from "@/services/recurring";
 import { listRules, upsertRule } from "@/services/rules";
 import { listGoals, upsertGoal } from "@/services/goals";
 import { listDebts, upsertDebt } from "@/services/debts";
-import { supabase } from "@/integrations/supabase/client"; // Import supabase client
 
-export async function seedMockData(): Promise<void> {
+export function seedMockData(): void {
   const accounts = mockDb.listAccounts();
   if (accounts.length === 0) {
     mockDb.upsertAccount({
@@ -108,27 +107,5 @@ export async function seedMockData(): Promise<void> {
     upsertDebt({ name: 'Credit Card', type: 'credit_card', balance: 3250.75, originalAmount: 5000, interestRate: 18.99, minimumPayment: 125, nextPaymentDate: undefined });
     upsertDebt({ name: 'Student Loan', type: 'student_loan', balance: 12450.50, originalAmount: 15000, interestRate: 4.5, minimumPayment: 280, nextPaymentDate: undefined });
     upsertDebt({ name: 'Auto Loan', type: 'loan', balance: 8400, originalAmount: 10000, interestRate: 6.9, minimumPayment: 260, nextPaymentDate: undefined });
-  }
-
-  // Seed initial budget strategy if none exist in Supabase
-  const { data: existingStrategies, error: strategiesError } = await supabase
-    .from('budget_strategies')
-    .select('id')
-    .limit(1);
-
-  if (strategiesError) {
-    console.error('Error fetching budget strategies:', strategiesError);
-  } else if (!existingStrategies || existingStrategies.length === 0) {
-    const { error: insertError } = await supabase
-      .from('budget_strategies')
-      .insert({
-        name: 'Traditional Budget',
-        strategy_type: 'traditional',
-        monthly_income: 5000,
-        is_active: true,
-      });
-    if (insertError) {
-      console.error('Error seeding initial budget strategy:', insertError);
-    }
   }
 }
