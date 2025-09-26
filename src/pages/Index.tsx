@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Navigation } from '@/components/Navigation';
 import { AccountCard } from '@/components/AccountCard';
 import { BudgetCard } from '@/components/BudgetCard';
@@ -25,15 +25,9 @@ import { useAccounts, useUpsertAccount } from '@/hooks/useAccounts';
 import type { DebtItem } from '@/services/debts';
 import type { Account } from '@/types';
 import { AccountsPage } from './AccountsPage';
-import { ProfilePreferences } from '@/components/ProfilePreferences'; // Import ProfilePreferences
-
-const spendingData = [
-  { category: 'Food & Dining', amount: 645, color: '#10B981' },
-  { category: 'Transportation', amount: 320, color: '#6366F1' },
-  { category: 'Entertainment', amount: 380, color: '#F59E0B' },
-  { category: 'Shopping', amount: 290, color: '#EF4444' },
-  { category: 'Bills & Utilities', amount: 480, color: '#8B5CF6' },
-];
+import { ProfilePreferences } from '@/components/ProfilePreferences';
+import { useCategories } from '@/hooks/useCategories'; // Import useCategories
+import { useTransactions } from '@/hooks/useTransactions'; // Import useTransactions
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -59,6 +53,61 @@ const Index = () => {
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const totalBudgetSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
   const totalBudgetAllocated = budgets.reduce((sum, b) => sum + b.allocated, 0);
+
+  const { data: allCategories = [] } = useCategories(); // Fetch all categories
+  const { data: allTransactionsData } = useTransactions(undefined, 1, 1000); // Fetch all transactions
+  const allTransactions = allTransactionsData?.items ?? [];
+
+  // Memoize spending data for top-tier categories
+  const spendingData = useMemo(() => {
+    const topLevelCategories = allCategories.filter(cat => cat.parent_id === null);
+    const categoryMap = new Map(allCategories.map(cat => [cat.id, cat]));
+    const spendingByTopCategory = new Map<string, { amount: number; color: string; name: string }>();
+
+    topLevelCategories.forEach(cat => {
+      spendingByTopCategory.set(cat.id, { amount: 0, color: cat.color || '#6366F1', name: cat.name });
+    });
+
+    allTransactions.forEach(tx => {
+      if (tx.type === 'expense' && tx.categoryId) {
+        let currentCategory = categoryMap.get(tx.categoryId);
+        let topLevelParentId = tx.categoryId;
+
+        // Traverse up to find the top-level parent
+        while (currentCategory && currentCategory.parent_id) {
+          topLevelParentId = currentCategory.parent_id;
+          currentCategory = categoryMap.get(currentCategory.parent_id);
+        }
+
+        if (spendingByTopCategory.has(topLevelParentId)) {
+          const current = spendingByTopCategory.get(topLevelParentId)!;
+          current.amount += tx.amount;
+          spendingByTopCategory.set(topLevelParentId, current);
+        } else {
+          // If a transaction's top-level category isn't explicitly in topLevelCategories (e.g., uncategorized or new)
+          // We can add it as an 'Other' or dynamically add it if needed.
+          // For now, let's ensure it's added if it's a top-level category itself.
+          if (categoryMap.has(topLevelParentId) && categoryMap.get(topLevelParentId)?.parent_id === null) {
+             const topCat = categoryMap.get(topLevelParentId)!;
+             spendingByTopCategory.set(topLevelParentId, { amount: tx.amount, color: topCat.color || '#CCCCCC', name: topCat.name });
+          } else {
+            // Handle cases where a category might not be found or is not top-level
+            // For simplicity, we can add to an 'Uncategorized' or 'Other' bucket
+            const otherId = 'other-expenses';
+            if (!spendingByTopCategory.has(otherId)) {
+              spendingByTopCategory.set(otherId, { amount: 0, color: '#A0A0A0', name: 'Other Expenses' });
+            }
+            const other = spendingByTopCategory.get(otherId)!;
+            other.amount += tx.amount;
+            spendingByTopCategory.set(otherId, other);
+          }
+        }
+      }
+    });
+
+    return Array.from(spendingByTopCategory.values()).filter(item => item.amount > 0);
+  }, [allCategories, allTransactions]);
+
 
   const handleEditDebt = (id: string) => {
     const debtToEdit = debts.find(d => d.id === id);
@@ -253,7 +302,7 @@ const Index = () => {
   const renderProfile = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Profile & Settings</h2>
-      <ProfilePreferences /> {/* New preferences component */}
+      <ProfilePreferences />
       <Card className="card-elevated animate-fade-in">
         <CardHeader>
           <CardTitle>Account Settings</CardTitle>
@@ -278,7 +327,7 @@ const Index = () => {
         return renderBudgets();
       case 'savings':
         return renderSavingsGoals();
-      case 'transactions': // This now includes recurring transactions
+      case 'transactions':
         return renderTransactions();
       case 'debts':
         return renderDebts();
@@ -313,8 +362,6 @@ const Index = () => {
           upsertGoal.mutate({ ...goal, is_active: true, current_amount: 0 });
         }}
       />
-
-      {/* Removed AddRecurringTransactionModal from here as it's now managed within RecurringTransactionsList */}
 
       <AddDebtModal
         isOpen={isAddDebtOpen}
