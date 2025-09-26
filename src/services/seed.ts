@@ -104,8 +104,10 @@ export function seedMockData(): void {
 
   const debts = listDebts();
   if (debts.length === 0) {
-    upsertDebt({ name: 'Credit Card', type: 'credit_card', balance: 3250.75, originalAmount: 5000, interestRate: 18.99, minimumPayment: 125, nextPaymentDate: undefined });
-    upsertDebt({ name: 'Student Loan', type: 'student_loan', balance: 12450.50, originalAmount: 25000, interestRate: 4.5, minimumPayment: 280, nextPaymentDate: undefined });
-    upsertDebt({ name: 'Auto Loan', type: 'loan', balance: 8400, originalAmount: 10000, interestRate: 6.9, minimumPayment: 260, nextPaymentDate: undefined });
+    upsertDebt({ name: 'Credit Card', type: 'credit_card', balance: 3250.75, interestRate: 18.99, minimumPayment: 125, nextPaymentDate: undefined });
+    upsertDebt({ name: 'Student Loan', type: 'student_loan', balance: 12450.50, interestRate: 4.5, minimumPayment: 280, nextPaymentDate: undefined });
+    upsertDebt({ name: 'Auto Loan', type: 'loan', balance: 8400, interestRate: 6.9, minimumPayment: 260, nextPaymentDate: undefined });
   }
 }
+
+

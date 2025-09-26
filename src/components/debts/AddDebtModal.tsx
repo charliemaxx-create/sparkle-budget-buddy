@@ -26,7 +26,6 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
   const [name, setName] = useState('');
   const [type, setType] = useState<DebtItem['type']>('credit_card');
   const [balance, setBalance] = useState('');
-  const [originalAmount, setOriginalAmount] = useState(''); // Added originalAmount state
   const [interestRate, setInterestRate] = useState('');
   const [minimumPayment, setMinimumPayment] = useState('');
   const [nextPaymentDate, setNextPaymentDate] = useState('');
@@ -35,7 +34,7 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name.trim() || !balance || isNaN(Number(balance)) || Number(balance) <= 0 || !originalAmount || isNaN(Number(originalAmount)) || Number(originalAmount) <= 0 || !interestRate || isNaN(Number(interestRate)) || !minimumPayment || isNaN(Number(minimumPayment)) || Number(minimumPayment) <= 0) {
+    if (!name.trim() || !balance || isNaN(Number(balance)) || Number(balance) <= 0 || !interestRate || isNaN(Number(interestRate)) || !minimumPayment || isNaN(Number(minimumPayment)) || Number(minimumPayment) <= 0) {
       // Basic validation
       return;
     }
@@ -45,7 +44,6 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
         name: name.trim(),
         type,
         balance: Number(balance),
-        originalAmount: Number(originalAmount), // Included originalAmount
         interestRate: Number(interestRate),
         minimumPayment: Number(minimumPayment),
         nextPaymentDate: nextPaymentDate || undefined,
@@ -59,7 +57,6 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
     setName('');
     setType('credit_card');
     setBalance('');
-    setOriginalAmount(''); // Reset originalAmount
     setInterestRate('');
     setMinimumPayment('');
     setNextPaymentDate('');
@@ -117,22 +114,6 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
             </div>
 
             <div className="grid w-full gap-1.5">
-              <Label htmlFor="originalAmount">Original Amount *</Label>
-              <Input
-                id="originalAmount"
-                type="number"
-                placeholder="0.00"
-                value={originalAmount}
-                onChange={(e) => setOriginalAmount(e.target.value)}
-                min="0.01"
-                step="0.01"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid w-full gap-1.5">
               <Label htmlFor="interestRate">Interest Rate (APR %) *</Label>
               <Input
                 id="interestRate"
@@ -145,7 +126,9 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
                 required
               />
             </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <div className="grid w-full gap-1.5">
               <Label htmlFor="minimumPayment">Minimum Payment *</Label>
               <Input
@@ -159,16 +142,16 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
                 required
               />
             </div>
-          </div>
 
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="nextPaymentDate">Next Payment Date</Label>
-            <Input
-              id="nextPaymentDate"
-              type="date"
-              value={nextPaymentDate}
-              onChange={(e) => setNextPaymentDate(e.target.value)}
-            />
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="nextPaymentDate">Next Payment Date</Label>
+              <Input
+                id="nextPaymentDate"
+                type="date"
+                value={nextPaymentDate}
+                onChange={(e) => setNextPaymentDate(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className="grid w-full gap-1.5">

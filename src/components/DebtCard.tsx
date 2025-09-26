@@ -2,13 +2,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard, Building2, Car, GraduationCap } from 'lucide-react';
-import type { DebtItem } from '@/services/debts'; // Import DebtItem
 
-interface DebtCardProps {
-  debt: DebtItem; // Use DebtItem from services
+interface Debt {
+  id: string;
+  name: string;
+  type: 'credit_card' | 'mortgage' | 'auto_loan' | 'student_loan' | 'personal_loan';
+  balance: number;
+  originalAmount: number;
+  interestRate: number;
+  minimumPayment: number;
+  nextPaymentDate: string;
 }
 
-const getDebtIcon = (type: DebtItem['type']) => {
+interface DebtCardProps {
+  debt: Debt;
+}
+
+const getDebtIcon = (type: Debt['type']) => {
   switch (type) {
     case 'credit_card':
       return CreditCard;
@@ -23,7 +33,7 @@ const getDebtIcon = (type: DebtItem['type']) => {
   }
 };
 
-const getDebtColor = (type: DebtItem['type']) => {
+const getDebtColor = (type: Debt['type']) => {
   switch (type) {
     case 'credit_card':
       return 'bg-destructive text-destructive-foreground';
@@ -40,10 +50,7 @@ const getDebtColor = (type: DebtItem['type']) => {
 
 export const DebtCard = ({ debt }: DebtCardProps) => {
   const Icon = getDebtIcon(debt.type);
-  // Safely calculate paidOffPercentage, handling cases where originalAmount might be 0
-  const paidOffPercentage = debt.originalAmount > 0 
-    ? ((debt.originalAmount - debt.balance) / debt.originalAmount) * 100 
-    : 0;
+  const paidOffPercentage = ((debt.originalAmount - debt.balance) / debt.originalAmount) * 100;
 
   return (
     <Card className="card-elevated animate-fade-in">

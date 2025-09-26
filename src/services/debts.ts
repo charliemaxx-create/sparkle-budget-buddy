@@ -5,7 +5,6 @@ export interface DebtItem {
   name: string;
   type: 'credit_card' | 'loan' | 'student_loan' | 'mortgage' | string;
   balance: number;
-  originalAmount: number; // Added originalAmount
   interestRate: number; // APR percent, e.g., 18.99
   minimumPayment: number;
   nextPaymentDate?: string; // ISO date
@@ -30,3 +29,6 @@ export function upsertDebt(input: Omit<DebtItem, 'id'> & { id?: string }): DebtI
 export function deleteDebt(id: string): void {
   writeJson(KEY, listDebts().filter(d => d.id !== id));
 }
+
+
+
