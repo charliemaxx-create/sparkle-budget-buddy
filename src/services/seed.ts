@@ -9,18 +9,53 @@ export function seedMockData(): void {
   const accounts = mockDb.listAccounts();
   if (accounts.length === 0) {
     mockDb.upsertAccount({
-      name: "Checking Account",
+      name: "Main Checking",
       type: "checking",
       currency: "USD",
-      balance: 2500,
-      institution: "Demo Bank",
+      balance: 4250.75,
+      institution: "Bank of America",
     });
     mockDb.upsertAccount({
-      name: "Savings Account",
+      name: "Emergency Savings",
       type: "savings",
       currency: "USD",
-      balance: 8000,
-      institution: "Demo Bank",
+      balance: 12800.50,
+      institution: "Ally Bank",
+    });
+    mockDb.upsertAccount({
+      name: "Travel Credit Card",
+      type: "credit_card", // Updated type
+      currency: "USD",
+      balance: -1250.25,
+      institution: "Chase",
+    });
+    mockDb.upsertAccount({
+      name: "Cash Wallet",
+      type: "cash",
+      currency: "USD",
+      balance: 150.00,
+      institution: "Personal",
+    });
+    mockDb.upsertAccount({
+      name: "Investment Portfolio",
+      type: "investment",
+      currency: "USD",
+      balance: 25000.00,
+      institution: "Fidelity",
+    });
+    mockDb.upsertAccount({
+      name: "Mortgage Loan",
+      type: "loan",
+      currency: "USD",
+      balance: -250000.00,
+      institution: "Wells Fargo",
+    });
+    mockDb.upsertAccount({
+      name: "Personal Liability",
+      type: "liability", // New type
+      currency: "USD",
+      balance: -500.00,
+      institution: "Friend",
     });
   }
 

@@ -14,9 +14,10 @@ export type AccountType =
   | "checking"
   | "savings"
   | "cash"
-  | "credit"
+  | "credit_card" // Changed from 'credit' to 'credit_card' for clarity
   | "investment"
   | "loan"
+  | "liability" // Added new account type
   | (string & {});
 
 export interface Account {
@@ -127,7 +128,3 @@ export interface PagedResult<T> {
   page: number;
   pageSize: number;
 }
-
-
-
-

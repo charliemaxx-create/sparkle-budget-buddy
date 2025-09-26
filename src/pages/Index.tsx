@@ -20,21 +20,21 @@ import { BudgetStrategyManager } from '@/components/budgeting/BudgetStrategyMana
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, DollarSign, Target, RotateCcw } from 'lucide-react';
-import { useDebts, useUpsertDebt, useDeleteDebt } from '@/hooks/useDebts'; // Import useDeleteDebt
+import { TrendingUp, TrendingDown, DollarSign, Target, RotateCcw, Plus } from 'lucide-react'; // Added Plus icon
+import { useDebts, useUpsertDebt, useDeleteDebt } from '@/hooks/useDebts';
 import { AddDebtModal } from '@/components/debts/AddDebtModal';
-import type { DebtItem } from '@/services/debts'; // Import DebtItem type
+import { AddAccountModal } from '@/components/AddAccountModal'; // Import AddAccountModal
+import { useAccounts, useUpsertAccount } from '@/hooks/useAccounts'; // Import useAccounts and useUpsertAccount
+import type { DebtItem } from '@/services/debts';
+import type { Account } from '@/types'; // Import Account type
 
-// Mock data
-const accounts = [
-  { id: '1', name: 'Chase Checking', type: 'checking' as const, balance: 4250.75, lastUpdated: '2 hours ago' },
-  { id: '2', name: 'Savings Account', type: 'savings' as const, balance: 12800.50, lastUpdated: '1 day ago' },
-  { id: '3', name: 'Credit Card', type: 'credit' as const, balance: -1250.25, lastUpdated: '3 hours ago' },
-  { id: '4', name: 'Cash Wallet', type: 'cash' as const, balance: 150.00, lastUpdated: '1 week ago' },
-];
-
-// Budgets now loaded from storage via hook
-// Debts now loaded from storage via hook
+// Mock data - these will be replaced by data from useAccounts hook
+// const accounts = [
+//   { id: '1', name: 'Chase Checking', type: 'checking' as const, balance: 4250.75, lastUpdated: '2 hours ago' },
+//   { id: '2', name: 'Savings Account', type: 'savings' as const, balance: 12800.50, lastUpdated: '1 day ago' },
+//   { id: '3', name: 'Credit Card', type: 'credit' as const, balance: -1250.25, lastUpdated: '3 hours ago' },
+//   { id: '4', name: 'Cash Wallet', type: 'cash' as const, balance: 150.00, lastUpdated: '1 week ago' },
+// ];
 
 const spendingData = [
   { category: 'Food & Dining', amount: 645, color: '#10B981' },
@@ -50,7 +50,12 @@ const Index = () => {
   const [isAddSavingsGoalOpen, setIsAddSavingsGoalOpen] = useState(false);
   const [isAddRecurringTransactionOpen, setIsAddRecurringTransactionOpen] = useState(false);
   const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
-  const [editingDebt, setEditingDebt] = useState<DebtItem | null>(null); // State for editing debt
+  const [editingDebt, setEditingDebt] = useState<DebtItem | null>(null);
+  const [isAddAccountOpen, setIsAddAccountOpen] = useState(false); // State for AddAccountModal
+  const [editingAccount, setEditingAccount] = useState<Account | null>(null); // State for editing account
+
+  const { data: accounts = [] } = useAccounts(); // Fetch accounts using hook
+  const upsertAccount = useUpsertAccount(); // Hook for adding/updating accounts
 
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
   
@@ -61,9 +66,9 @@ const Index = () => {
   const upsertRecurring = useUpsertRecurring();
   const delRecurring = useDeleteRecurring();
   const toggleRecurring = useToggleRecurring();
-  const { data: debts = [] } = useDebts(); // Fetch debts using hook
-  const upsertDebt = useUpsertDebt(); // Hook for adding/updating debts
-  const deleteDebt = useDeleteDebt(); // Hook for deleting debts
+  const { data: debts = [] } = useDebts();
+  const upsertDebt = useUpsertDebt();
+  const deleteDebt = useDeleteDebt();
 
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const totalBudgetSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
@@ -85,7 +90,21 @@ const Index = () => {
 
   const handleCloseDebtModal = () => {
     setIsAddDebtOpen(false);
-    setEditingDebt(null); // Clear editing state
+    setEditingDebt(null);
+  };
+
+  const handleAddAccount = () => {
+    setEditingAccount(null);
+    setIsAddAccountOpen(true);
+  };
+
+  const handleSaveAccount = (account: Omit<Account, 'id' | 'lastUpdatedIso'> & { id?: string }) => {
+    upsertAccount.mutate({ ...account, lastUpdatedIso: new Date().toISOString() });
+  };
+
+  const handleCloseAccountModal = () => {
+    setIsAddAccountOpen(false);
+    setEditingAccount(null);
   };
 
   const renderDashboard = () => (
@@ -145,7 +164,13 @@ const Index = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Accounts */}
         <div className="lg:col-span-1">
-          <h2 className="text-lg font-semibold mb-4">Accounts</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold">Accounts</h2>
+            <Button size="sm" className="btn-gradient" onClick={handleAddAccount}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Account
+            </Button>
+          </div>
           <div className="space-y-4">
             {accounts.map((account) => (
               <AccountCard key={account.id} account={account} />
@@ -372,8 +397,15 @@ const Index = () => {
         isOpen={isAddDebtOpen}
         onClose={handleCloseDebtModal}
         onAdd={(debt) => {
-          upsertDebt.mutate({ ...debt, id: editingDebt?.id }); // Use existing ID if editing
+          upsertDebt.mutate({ ...debt, id: editingDebt?.id });
         }}
+      />
+
+      <AddAccountModal
+        isOpen={isAddAccountOpen}
+        onClose={handleCloseAccountModal}
+        onSave={handleSaveAccount}
+        initialData={editingAccount}
       />
     </div>
   );
