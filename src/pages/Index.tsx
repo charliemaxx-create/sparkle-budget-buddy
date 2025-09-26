@@ -32,6 +32,9 @@ const accounts = [
   { id: '4', name: 'Cash Wallet', type: 'cash' as const, balance: 150.00, lastUpdated: '1 week ago' },
 ];
 
+// Budgets now loaded from storage via hook
+// Debts now loaded from storage via hook
+
 const spendingData = [
   { category: 'Food & Dining', amount: 645, color: '#10B981' },
   { category: 'Transportation', amount: 320, color: '#6366F1' },
@@ -59,7 +62,7 @@ const Index = () => {
   const { data: debts = [] } = useDebts(); // Fetch debts using hook
   const upsertDebt = useUpsertDebt(); // Hook for adding/updating debts
 
-  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0); // Correctly use debts from hook
+  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const totalBudgetSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
   const totalBudgetAllocated = budgets.reduce((sum, b) => sum + b.allocated, 0);
 
