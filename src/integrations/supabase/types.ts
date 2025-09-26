@@ -14,6 +14,151 @@ export type Database = {
   }
   public: {
     Tables: {
+      budget_allocations: {
+        Row: {
+          allocated_amount: number
+          category_name: string
+          category_type: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          percentage_of_income: number | null
+          priority_order: number | null
+          remaining_amount: number
+          spent_amount: number
+          strategy_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          allocated_amount?: number
+          category_name: string
+          category_type: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          percentage_of_income?: number | null
+          priority_order?: number | null
+          remaining_amount?: number
+          spent_amount?: number
+          strategy_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          allocated_amount?: number
+          category_name?: string
+          category_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          percentage_of_income?: number | null
+          priority_order?: number | null
+          remaining_amount?: number
+          spent_amount?: number
+          strategy_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_allocations_strategy_id_fkey"
+            columns: ["strategy_id"]
+            isOneToOne: false
+            referencedRelation: "budget_strategies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_strategies: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          monthly_income: number | null
+          name: string
+          settings: Json | null
+          strategy_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          monthly_income?: number | null
+          name: string
+          settings?: Json | null
+          strategy_type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          monthly_income?: number | null
+          name?: string
+          settings?: Json | null
+          strategy_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      envelope_budgets: {
+        Row: {
+          allocated_amount: number
+          color: string | null
+          created_at: string
+          current_amount: number
+          envelope_name: string
+          icon: string | null
+          id: string
+          is_virtual: boolean | null
+          strategy_id: string | null
+          target_amount: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          allocated_amount?: number
+          color?: string | null
+          created_at?: string
+          current_amount?: number
+          envelope_name: string
+          icon?: string | null
+          id?: string
+          is_virtual?: boolean | null
+          strategy_id?: string | null
+          target_amount?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          allocated_amount?: number
+          color?: string | null
+          created_at?: string
+          current_amount?: number
+          envelope_name?: string
+          icon?: string | null
+          id?: string
+          is_virtual?: boolean | null
+          strategy_id?: string | null
+          target_amount?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "envelope_budgets_strategy_id_fkey"
+            columns: ["strategy_id"]
+            isOneToOne: false
+            referencedRelation: "budget_strategies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recurring_transactions: {
         Row: {
           account_id: string | null

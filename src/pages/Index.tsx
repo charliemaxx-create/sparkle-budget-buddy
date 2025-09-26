@@ -9,6 +9,7 @@ import { SavingsGoalCard } from '@/components/SavingsGoalCard';
 import { AddSavingsGoalModal } from '@/components/AddSavingsGoalModal';
 import { RecurringTransactionCard } from '@/components/RecurringTransactionCard';
 import { AddRecurringTransactionModal } from '@/components/AddRecurringTransactionModal';
+import { BudgetStrategyManager } from '@/components/budgeting/BudgetStrategyManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -265,17 +266,7 @@ const Index = () => {
   );
 
   const renderBudgets = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Budget Management</h2>
-        <Button className="btn-gradient">Add Budget Category</Button>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {budgets.map((budget) => (
-          <BudgetCard key={budget.id} budget={budget} />
-        ))}
-      </div>
-    </div>
+    <BudgetStrategyManager budgets={budgets} />
   );
 
   const renderDebts = () => (
