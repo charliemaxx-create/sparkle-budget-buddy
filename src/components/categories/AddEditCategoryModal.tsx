@@ -116,12 +116,15 @@ export const AddEditCategoryModal = ({ isOpen, onClose, onSave, initialData }: A
 
           <div className="grid w-full gap-1.5">
             <Label htmlFor="parent">Parent Category (Optional)</Label>
-            <Select value={parentId || ''} onValueChange={(value) => setParentId(value === '' ? null : value)}>
+            <Select 
+              value={parentId || 'no-parent'} 
+              onValueChange={(value) => setParentId(value === 'no-parent' ? null : value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a parent category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No Parent</SelectItem>
+                <SelectItem value="no-parent">No Parent</SelectItem> {/* Changed value from "" to "no-parent" */}
                 {filteredParentCategories.filter(cat => cat.type === type).map((cat) => (
                   <SelectItem key={cat.id} value={cat.id}>
                     {cat.name}
