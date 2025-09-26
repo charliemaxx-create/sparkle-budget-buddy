@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, DollarSign, Play, Pause, Edit, Trash2 } from 'lucide-react';
-import { formatCurrency } from '@/utils/currency'; // Import formatCurrency
 
 interface RecurringTransaction {
   id: string;
@@ -19,7 +18,6 @@ interface RecurringTransaction {
   is_active: boolean;
   account_id?: string;
   tags?: string[];
-  currency: string; // Added currency
 }
 
 interface RecurringTransactionCardProps {
@@ -84,7 +82,7 @@ export const RecurringTransactionCard = ({
             variant={transaction.type === 'income' ? 'default' : 'secondary'}
             className={transaction.type === 'income' ? 'bg-success text-success-foreground' : ''}
           >
-            {transaction.type === 'income' ? '+' : ''}{formatCurrency(transaction.amount, transaction.currency)}
+            {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toLocaleString()}
           </Badge>
           {!transaction.is_active && (
             <Badge variant="outline" className="text-xs">

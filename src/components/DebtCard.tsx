@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { CreditCard, Building2, Car, GraduationCap, Edit, Trash2 } from 'lucide-react';
-import { formatCurrency } from '@/utils/currency'; // Import formatCurrency
+import { Button } from '@/components/ui/button'; // Import Button
+import { CreditCard, Building2, Car, GraduationCap, Edit, Trash2 } from 'lucide-react'; // Import Edit and Trash2 icons
 
 interface Debt {
   id: string;
@@ -14,7 +13,6 @@ interface Debt {
   interestRate: number;
   minimumPayment: number;
   nextPaymentDate: string;
-  currency: string; // Added currency
 }
 
 interface DebtCardProps {
@@ -83,19 +81,19 @@ export const DebtCard = ({ debt, onEdit, onDelete }: DebtCardProps) => {
       <CardContent>
         <div className="space-y-3">
           <div className="text-2xl font-bold text-destructive">
-            {formatCurrency(debt.balance, debt.currency)}
+            ${debt.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </div>
           
           <Progress value={paidOffPercentage} className="w-full" />
           
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{paidOffPercentage.toFixed(1)}% paid off</span>
-            <span>{debt.interestRate}% APR</span>
+            <span>${debt.interestRate}% APR</span>
           </div>
           
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Min Payment:</span>
-            <span className="font-medium">{formatCurrency(debt.minimumPayment, debt.currency)}</span>
+            <span className="font-medium">${debt.minimumPayment}</span>
           </div>
           
           <div className="text-xs text-muted-foreground">

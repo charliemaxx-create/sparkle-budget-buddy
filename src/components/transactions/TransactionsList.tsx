@@ -5,7 +5,6 @@ import { useAccounts } from '@/hooks/useAccounts';
 import { useDeleteTransaction, useTransactions, useUpsertTransaction } from '@/hooks/useTransactions';
 import { TransactionModal } from './TransactionModal';
 import { ImportCsvModal } from './ImportCsvModal';
-import { formatCurrency } from '@/utils/currency'; // Import formatCurrency
 
 export function TransactionsList() {
   const { data: accounts = [] } = useAccounts();
@@ -52,7 +51,7 @@ export function TransactionsList() {
                       <td className="py-2 pr-4">{account?.name ?? tx.accountId}</td>
                       <td className="py-2 pr-4">{tx.description}</td>
                       <td className={`py-2 pr-4 text-right ${amount < 0 ? 'text-destructive' : 'text-success'}`}>
-                        {formatCurrency(Math.abs(tx.amount), tx.currency)}
+                        {amount < 0 ? '-' : '+'}${Math.abs(tx.amount).toFixed(2)}
                       </td>
                       <td className="py-2 pr-4 text-right">
                         <Button variant="outline" size="sm" onClick={() => del.mutate(tx.id)}>Delete</Button>
@@ -95,3 +94,5 @@ export function TransactionsList() {
     </div>
   );
 }
+
+

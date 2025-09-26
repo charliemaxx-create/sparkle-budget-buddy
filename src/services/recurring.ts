@@ -1,5 +1,4 @@
 import { readJson, writeJson } from "@/services/storage";
-import type { CurrencyCode } from "@/types"; // Import CurrencyCode
 
 export type RecurringFrequency = 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'quarterly' | 'yearly';
 
@@ -18,7 +17,6 @@ export interface RecurringItem {
   is_active: boolean;
   account_id?: string;
   tags?: string[];
-  currency: CurrencyCode; // Added currency
 }
 
 const KEY = 'recurring';
@@ -74,3 +72,7 @@ function computeNextExecutionDate(startIso: string, frequency: RecurringFrequenc
   }
   return next.toISOString();
 }
+
+
+
+

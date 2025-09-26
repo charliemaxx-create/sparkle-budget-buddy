@@ -26,9 +26,8 @@ import { AddDebtModal } from '@/components/debts/AddDebtModal';
 import { AddAccountModal } from '@/components/AddAccountModal';
 import { useAccounts, useUpsertAccount } from '@/hooks/useAccounts';
 import type { DebtItem } from '@/services/debts';
-import type { Account, CurrencyCode } from '@/types';
-import { AccountsPage } from './AccountsPage';
-import { formatCurrency, convertCurrency } from '@/utils/currency'; // Import currency utilities
+import type { Account } from '@/types';
+import { AccountsPage } from './AccountsPage'; // Import the new AccountsPage
 
 const spendingData = [
   { category: 'Food & Dining', amount: 645, color: '#10B981' },
@@ -51,11 +50,7 @@ const Index = () => {
   const { data: accounts = [] } = useAccounts();
   const upsertAccount = useUpsertAccount();
 
-  const baseCurrency: CurrencyCode = 'USD'; // Define a base currency for dashboard aggregation
-
-  const totalBalance = accounts.reduce((sum, account) => {
-    return sum + convertCurrency(account.balance, account.currency, baseCurrency);
-  }, 0);
+  const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
   
   const { data: budgets = [] } = useBudgets();
   const { data: savingsGoals = [] } = useGoals();
@@ -68,16 +63,9 @@ const Index = () => {
   const upsertDebt = useUpsertDebt();
   const deleteDebt = useDeleteDebt();
 
-  const totalDebt = debts.reduce((sum, debt) => {
-    return sum + convertCurrency(debt.balance, debt.currency, baseCurrency);
-  }, 0);
-
-  const totalBudgetSpent = budgets.reduce((sum, b) => {
-    return sum + convertCurrency(b.spent, b.currency, baseCurrency);
-  }, 0);
-  const totalBudgetAllocated = budgets.reduce((sum, b) => {
-    return sum + convertCurrency(b.allocated, b.currency, baseCurrency);
-  }, 0);
+  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  const totalBudgetSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
+  const totalBudgetAllocated = budgets.reduce((sum, b) => sum + b.allocated, 0);
 
   const handleEditDebt = (id: string) => {
     const debtToEdit = debts.find(d => d.id === id);
@@ -118,36 +106,36 @@ const Index = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="card-balance animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-white">Net Worth ({baseCurrency})</CardTitle>
+            <CardTitle className="text-sm font-medium text-white">Net Worth</CardTitle>
             <DollarSign className="h-4 w-4 text-white" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">
-              {formatCurrency(totalBalance - totalDebt, baseCurrency)}
+              ${(totalBalance - totalDebt).toLocaleString()}
             </div>
           </CardContent>
         </Card>
         
         <Card className="card-elevated animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Assets ({baseCurrency})</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
             <TrendingUp className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">
-              {formatCurrency(totalBalance, baseCurrency)}
+              ${totalBalance.toLocaleString()}
             </div>
           </CardContent>
         </Card>
         
         <Card className="card-elevated animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Debt ({baseCurrency})</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Debt</CardTitle>
             <TrendingDown className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">
-              {formatCurrency(totalDebt, baseCurrency)}
+              ${totalDebt.toLocaleString()}
             </div>
           </CardContent>
         </Card>
@@ -159,7 +147,7 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {totalBudgetAllocated > 0 ? ((totalBudgetSpent / totalBudgetAllocated) * 100).toFixed(0) : 0}%
+              {((totalBudgetSpent / totalBudgetAllocated) * 100).toFixed(0)}%
             </div>
           </CardContent>
         </Card>
@@ -332,7 +320,7 @@ const Index = () => {
 
   const renderActiveTab = () => {
     switch (activeTab) {
-      case 'accounts':
+      case 'accounts': // Render AccountsPage for the 'accounts' tab
         return <AccountsPage />;
       case 'budgets':
         return renderBudgets();
@@ -392,6 +380,7 @@ const Index = () => {
         }}
       />
 
+      {/* AddAccountModal is now managed within AccountsPage, but keeping it here for other potential uses if needed */}
       <AddAccountModal
         isOpen={isAddAccountOpen}
         onClose={handleCloseAccountModal}

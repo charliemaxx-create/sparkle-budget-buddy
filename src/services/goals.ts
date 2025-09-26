@@ -1,5 +1,4 @@
 import { readJson, writeJson } from "@/services/storage";
-import type { CurrencyCode } from "@/types"; // Import CurrencyCode
 
 export interface SavingsGoalItem {
   id: string;
@@ -12,7 +11,6 @@ export interface SavingsGoalItem {
   icon: string;
   color: string;
   is_active: boolean;
-  currency: CurrencyCode; // Added currency
 }
 
 const KEY = "savings_goals";
@@ -45,3 +43,6 @@ export function projectGoalCompletionDate(goal: SavingsGoalItem, monthlyContribu
   d.setMonth(d.getMonth() + months);
   return d.toISOString();
 }
+
+
+

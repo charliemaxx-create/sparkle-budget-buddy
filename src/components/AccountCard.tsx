@@ -1,14 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Wallet, CreditCard, Banknote, Landmark, PiggyBank, TrendingDown } from 'lucide-react';
-import { formatCurrency } from '@/utils/currency'; // Import formatCurrency
+import { Wallet, CreditCard, Banknote, Landmark, PiggyBank, TrendingDown } from 'lucide-react'; // Added Landmark, PiggyBank, TrendingDown
 
 interface Account {
   id: string;
   name: string;
-  type: 'checking' | 'savings' | 'credit_card' | 'cash' | 'investment' | 'loan' | 'liability';
+  type: 'checking' | 'savings' | 'credit_card' | 'cash' | 'investment' | 'loan' | 'liability'; // Updated types
   balance: number;
-  currency: string; // Added currency
   lastUpdated: string;
 }
 
@@ -19,18 +17,18 @@ interface AccountCardProps {
 const getAccountIcon = (type: Account['type']) => {
   switch (type) {
     case 'checking':
-      return Landmark;
+      return Landmark; // Bank icon for checking
     case 'savings':
-      return PiggyBank;
-    case 'credit_card':
+      return PiggyBank; // Piggy bank for savings
+    case 'credit_card': // Updated type
       return CreditCard;
     case 'cash':
       return Banknote;
     case 'investment':
-      return TrendingUp;
+      return TrendingUp; // Trending up for investment
     case 'loan':
-    case 'liability':
-      return TrendingDown;
+    case 'liability': // New type
+      return TrendingDown; // Trending down for liabilities/loans
     default:
       return Wallet;
   }
@@ -42,14 +40,14 @@ const getAccountColor = (type: Account['type']) => {
       return 'bg-info text-info-foreground';
     case 'savings':
       return 'bg-success text-success-foreground';
-    case 'credit_card':
+    case 'credit_card': // Updated type
       return 'bg-warning text-warning-foreground';
     case 'cash':
       return 'bg-secondary text-secondary-foreground';
     case 'investment':
       return 'bg-primary text-primary-foreground';
     case 'loan':
-    case 'liability':
+    case 'liability': // New type
       return 'bg-destructive text-destructive-foreground';
     default:
       return 'bg-muted text-muted-foreground';
@@ -72,7 +70,7 @@ export const AccountCard = ({ account }: AccountCardProps) => {
       <CardContent>
         <div className="text-2xl font-bold">
           <span className={isNegative ? 'text-destructive' : 'text-success'}>
-            {formatCurrency(Math.abs(account.balance), account.currency)}
+            ${Math.abs(account.balance).toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-1">

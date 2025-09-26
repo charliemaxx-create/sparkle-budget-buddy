@@ -2,10 +2,7 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { parseCsv } from '@/utils/csv';
-import type { Account, Transaction, CurrencyCode } from '@/types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { currencyCodes } from '@/utils/currency'; // Import currencyCodes
+import type { Account, Transaction } from '@/types';
 
 type MappingKey = 'date' | 'description' | 'amount' | 'account' | 'type' | 'currency';
 
@@ -27,7 +24,6 @@ export function ImportCsvModal({ open, onClose, accounts, onImport }: ImportCsvM
     currency: '',
   });
   const [fallbackAccountId, setFallbackAccountId] = useState<string>(accounts[0]?.id ?? '');
-  const [fallbackCurrency, setFallbackCurrency] = useState<CurrencyCode>('USD'); // New fallback currency state
   const [errors, setErrors] = useState<string[]>([]);
 
   const parsed = useMemo(() => {
@@ -75,7 +71,7 @@ export function ImportCsvModal({ open, onClose, accounts, onImport }: ImportCsvM
     const result: Array<Omit<Transaction, 'id' | 'createdAtIso' | 'updatedAtIso'>> = [];
     for (const r of rows) {
       const accountId = acctIdx >= 0 ? accounts.find(a => a.name === r[acctIdx])?.id ?? fallbackAccountId : fallbackAccountId;
-      const currency = currencyIdx >= 0 ? (r[currencyIdx] as CurrencyCode || fallbackCurrency) : fallbackCurrency;
+      const currency = currencyIdx >= 0 ? r[currencyIdx] || 'USD' : 'USD';
       const type = (typeIdx >= 0 ? (r[typeIdx] || '').toLowerCase() : (Number(r[amountIdx]) < 0 ? 'expense' : 'income')) as Transaction['type'];
       const rawAmount = Number(r[amountIdx]);
       const amount = Math.abs(isNaN(rawAmount) ? 0 : rawAmount);
@@ -106,59 +102,33 @@ export function ImportCsvModal({ open, onClose, accounts, onImport }: ImportCsvM
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {(Object.keys(mapping) as MappingKey[]).map(k => (
                   <div key={k}>
-                    <Label className="block text-sm mb-1">{k}</Label>
-                    <Select
+                    <label className="block text-sm mb-1">{k}</label>
+                    <select
+                      className="w-full border rounded px-3 py-2 bg-background"
                       value={mapping[k]}
-                      onValueChange={(value) => setMapping({ ...mapping, [k]: value })}
+                      onChange={(e) => setMapping({ ...mapping, [k]: e.target.value })}
                     >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="(not mapped)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">(not mapped)</SelectItem>
-                        {headers.map(h => (
-                          <SelectItem key={h} value={h}>{h}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <option value="">(not mapped)</option>
+                      {headers.map(h => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="block text-sm mb-1">Fallback Account</Label>
-                <Select
-                  value={fallbackAccountId}
-                  onValueChange={setFallbackAccountId}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select account" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {accounts.map(a => (
-                      <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="block text-sm mb-1">Fallback Currency</Label>
-                <Select
-                  value={fallbackCurrency}
-                  onValueChange={setFallbackCurrency}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select currency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencyCodes.map(c => (
-                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <label className="block text-sm mb-1">Fallback Account</label>
+              <select
+                className="w-full border rounded px-3 py-2 bg-background max-w-xs"
+                value={fallbackAccountId}
+                onChange={(e) => setFallbackAccountId(e.target.value)}
+              >
+                {accounts.map(a => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
             </div>
 
             {parsed && (
@@ -203,3 +173,7 @@ export function ImportCsvModal({ open, onClose, accounts, onImport }: ImportCsvM
     </div>
   );
 }
+
+
+
+

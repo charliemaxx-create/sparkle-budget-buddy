@@ -9,8 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Mail, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { currencyCodes } from '@/utils/currency'; // Import currencyCodes
-import type { CurrencyCode } from '@/types';
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -23,7 +21,6 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
   const [account, setAccount] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [currency, setCurrency] = useState<CurrencyCode>('USD'); // New currency state
   const { toast } = useToast();
 
   const categories = [
@@ -49,7 +46,7 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
     
     toast({
       title: "Transaction Added",
-      description: `$${amount} transaction for ${category} has been recorded.`, // TODO: Use formatCurrency here
+      description: `$${amount} transaction for ${category} has been recorded.`,
     });
     
     // Reset form
@@ -58,7 +55,6 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
     setAccount('');
     setDescription('');
     setDate(new Date().toISOString().split('T')[0]);
-    setCurrency('USD'); // Reset currency
     onClose();
   };
 
@@ -106,19 +102,14 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="currency">Currency *</Label>
-                  <Select value={currency} onValueChange={(value: CurrencyCode) => setCurrency(value)} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencyCodes.map((cc) => (
-                        <SelectItem key={cc.value} value={cc.value}>
-                          {cc.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    required
+                  />
                 </div>
               </div>
               
@@ -155,17 +146,6 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="description">Description (Optional)</Label>
                 <Textarea

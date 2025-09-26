@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Account, Transaction, TransactionType } from '@/types';
-import { formatCurrency } from '@/utils/currency'; // Import formatCurrency
 
 interface TransactionModalProps {
   open: boolean;
@@ -152,3 +151,6 @@ export function TransactionModal({ open, onClose, onSave, accounts, initial }: T
     </div>
   );
 }
+
+
+

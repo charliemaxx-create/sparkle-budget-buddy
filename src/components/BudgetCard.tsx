@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency } from '@/utils/currency'; // Import formatCurrency
 
 interface Budget {
   id: string;
@@ -10,7 +9,6 @@ interface Budget {
   spent: number;
   icon: string;
   color: string;
-  currency: string; // Added currency
 }
 
 interface BudgetCardProps {
@@ -45,15 +43,15 @@ export const BudgetCard = ({ budget }: BudgetCardProps) => {
           
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">
-              {formatCurrency(budget.spent, budget.currency)} spent
+              ${budget.spent.toLocaleString()} spent
             </span>
             <span className={remaining >= 0 ? 'text-success' : 'text-destructive'}>
-              {formatCurrency(Math.abs(remaining), budget.currency)} {remaining >= 0 ? 'left' : 'over'}
+              ${Math.abs(remaining).toLocaleString()} {remaining >= 0 ? 'left' : 'over'}
             </span>
           </div>
           
           <div className="text-xs text-muted-foreground">
-            Budget: {formatCurrency(budget.allocated, budget.currency)}
+            Budget: ${budget.allocated.toLocaleString()}
           </div>
         </div>
       </CardContent>

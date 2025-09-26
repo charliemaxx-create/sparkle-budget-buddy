@@ -6,8 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import type { CurrencyCode } from '@/types';
-import { currencyCodes } from '@/utils/currency'; // Import currencyCodes
 
 interface AddRecurringTransactionModalProps {
   isOpen: boolean;
@@ -23,7 +21,6 @@ interface AddRecurringTransactionModalProps {
     end_date?: string;
     account_id?: string;
     tags?: string[];
-    currency: CurrencyCode; // Added currency
   }) => void;
 }
 
@@ -72,7 +69,6 @@ export const AddRecurringTransactionModal = ({ isOpen, onClose, onAdd }: AddRecu
   const [hasEndDate, setHasEndDate] = useState(false);
   const [endDate, setEndDate] = useState('');
   const [tags, setTags] = useState('');
-  const [currency, setCurrency] = useState<CurrencyCode>('USD'); // New currency state
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,8 +87,7 @@ export const AddRecurringTransactionModal = ({ isOpen, onClose, onAdd }: AddRecu
         frequency,
         start_date: startDate,
         end_date: hasEndDate && endDate ? endDate : undefined,
-        tags: tags.trim() ? tags.split(',').map(tag => tag.trim()).filter(Boolean) : undefined,
-        currency, // Pass currency
+        tags: tags.trim() ? tags.split(',').map(tag => tag.trim()).filter(Boolean) : undefined
       });
     }
 
@@ -110,7 +105,6 @@ export const AddRecurringTransactionModal = ({ isOpen, onClose, onAdd }: AddRecu
     setHasEndDate(false);
     setEndDate('');
     setTags('');
-    setCurrency('USD'); // Reset currency
     onClose();
   };
 
@@ -159,24 +153,6 @@ export const AddRecurringTransactionModal = ({ isOpen, onClose, onAdd }: AddRecu
             </div>
 
             <div className="grid w-full gap-1.5">
-              <Label htmlFor="currency">Currency *</Label>
-              <Select value={currency} onValueChange={(value: CurrencyCode) => setCurrency(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select currency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {currencyCodes.map((cc) => (
-                    <SelectItem key={cc.value} value={cc.value}>
-                      {cc.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid w-full gap-1.5">
               <Label htmlFor="type">Type *</Label>
               <Select value={type} onValueChange={(value: 'income' | 'expense') => {
                 setType(value);
@@ -191,7 +167,9 @@ export const AddRecurringTransactionModal = ({ isOpen, onClose, onAdd }: AddRecu
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <div className="grid w-full gap-1.5">
               <Label htmlFor="category">Category *</Label>
               <Select value={category} onValueChange={setCategory}>
@@ -207,22 +185,22 @@ export const AddRecurringTransactionModal = ({ isOpen, onClose, onAdd }: AddRecu
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="frequency">Frequency *</Label>
-            <Select value={frequency} onValueChange={(value: any) => setFrequency(value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {frequencies.map((freq) => (
-                  <SelectItem key={freq.value} value={freq.value}>
-                    {freq.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="frequency">Frequency *</Label>
+              <Select value={frequency} onValueChange={(value: any) => setFrequency(value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {frequencies.map((freq) => (
+                    <SelectItem key={freq.value} value={freq.value}>
+                      {freq.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid w-full gap-1.5">

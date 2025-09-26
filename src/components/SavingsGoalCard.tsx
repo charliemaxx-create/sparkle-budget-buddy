@@ -3,7 +3,6 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Target, Plus } from 'lucide-react';
-import { formatCurrency } from '@/utils/currency'; // Import formatCurrency
 
 interface SavingsGoal {
   id: string;
@@ -16,7 +15,6 @@ interface SavingsGoal {
   icon: string;
   color: string;
   is_active: boolean;
-  currency: string; // Added currency
 }
 
 interface SavingsGoalCardProps {
@@ -76,11 +74,11 @@ export const SavingsGoalCard = ({ goal, onAddMoney }: SavingsGoalCardProps) => {
           
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">
-              {formatCurrency(goal.current_amount, goal.currency)} saved
+              ${goal.current_amount.toLocaleString()} saved
             </span>
             <span className={remaining > 0 ? 'text-muted-foreground' : 'text-success'}>
               {remaining > 0 
-                ? `${formatCurrency(remaining, goal.currency)} to go`
+                ? `$${remaining.toLocaleString()} to go`
                 : 'Goal reached! 🎉'
               }
             </span>
@@ -88,7 +86,7 @@ export const SavingsGoalCard = ({ goal, onAddMoney }: SavingsGoalCardProps) => {
           
           <div className="flex justify-between items-center text-xs">
             <div className="text-muted-foreground">
-              Target: {formatCurrency(goal.target_amount, goal.currency)}
+              Target: ${goal.target_amount.toLocaleString()}
             </div>
             {goal.target_date && (
               <div className="flex items-center text-muted-foreground">
@@ -114,7 +112,7 @@ export const SavingsGoalCard = ({ goal, onAddMoney }: SavingsGoalCardProps) => {
               size="sm" 
               className="w-full btn-gradient"
               onClick={() => {
-                const amount = prompt(`How much ${goal.currency} would you like to add?`);
+                const amount = prompt('How much would you like to add?');
                 if (amount && !isNaN(Number(amount))) {
                   onAddMoney(goal.id, Number(amount));
                 }
