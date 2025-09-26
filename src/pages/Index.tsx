@@ -17,7 +17,7 @@ import { BudgetStrategyManager } from '@/components/budgeting/BudgetStrategyMana
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, DollarSign, Target, Plus } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Target, Plus, PieChart } from 'lucide-react'; // Added PieChart icon
 import { useDebts, useUpsertDebt, useDeleteDebt } from '@/hooks/useDebts';
 import { AddDebtModal } from '@/components/debts/AddDebtModal';
 import { AddAccountModal } from '@/components/AddAccountModal';
@@ -28,6 +28,7 @@ import { AccountsPage } from './AccountsPage';
 import { ProfilePreferences } from '@/components/ProfilePreferences';
 import { useCategories } from '@/hooks/useCategories'; // Import useCategories
 import { useTransactions } from '@/hooks/useTransactions'; // Import useTransactions
+import { Progress } from '@/components/ui/progress'; // Import Progress component
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -53,6 +54,9 @@ const Index = () => {
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const totalBudgetSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
   const totalBudgetAllocated = budgets.reduce((sum, b) => sum + b.allocated, 0);
+  const totalBudgetRemaining = totalBudgetAllocated - totalBudgetSpent;
+  const totalBudgetPercentage = totalBudgetAllocated > 0 ? (totalBudgetSpent / totalBudgetAllocated) * 100 : 0;
+  const isTotalBudgetOver = totalBudgetSpent > totalBudgetAllocated;
 
   const { data: allCategories = [] } = useCategories(); // Fetch all categories
   const { data: allTransactionsData } = useTransactions(undefined, 1, 1000); // Fetch all transactions
@@ -86,21 +90,14 @@ const Index = () => {
         } else {
           // If a transaction's top-level category isn't explicitly in topLevelCategories (e.g., uncategorized or new)
           // We can add it as an 'Other' or dynamically add it if needed.
-          // For now, let's ensure it's added if it's a top-level category itself.
-          if (categoryMap.has(topLevelParentId) && categoryMap.get(topLevelParentId)?.parent_id === null) {
-             const topCat = categoryMap.get(topLevelParentId)!;
-             spendingByTopCategory.set(topLevelParentId, { amount: tx.amount, color: topCat.color || '#CCCCCC', name: topCat.name });
-          } else {
-            // Handle cases where a category might not be found or is not top-level
-            // For simplicity, we can add to an 'Uncategorized' or 'Other' bucket
-            const otherId = 'other-expenses';
-            if (!spendingByTopCategory.has(otherId)) {
-              spendingByTopCategory.set(otherId, { amount: 0, color: '#A0A0A0', name: 'Other Expenses' });
-            }
-            const other = spendingByTopCategory.get(otherId)!;
-            other.amount += tx.amount;
-            spendingByTopCategory.set(otherId, other);
+          // For simplicity, we can add to an 'Uncategorized' or 'Other' bucket
+          const otherId = 'other-expenses';
+          if (!spendingByTopCategory.has(otherId)) {
+            spendingByTopCategory.set(otherId, { amount: 0, color: '#A0A0A0', name: 'Other Expenses' });
           }
+          const other = spendingByTopCategory.get(otherId)!;
+          other.amount += tx.amount;
+          spendingByTopCategory.set(otherId, other);
         }
       }
     });
@@ -207,11 +204,35 @@ const Index = () => {
         <div className="lg:col-span-1 space-y-6">
           <div>
             <h2 className="text-lg font-semibold mb-4">Budget Overview</h2>
-            <div className="space-y-4">
-              {budgets.map((budget) => (
-                <BudgetCard key={budget.id} budget={budget} />
-              ))}
-            </div>
+            <Card className="card-elevated animate-fade-in">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <PieChart className="h-4 w-4 mr-2" />
+                  Overall Budget
+                </CardTitle>
+                <Badge variant={isTotalBudgetOver ? 'destructive' : 'secondary'}>
+                  {totalBudgetPercentage.toFixed(0)}% Used
+                </Badge>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Progress value={Math.min(totalBudgetPercentage, 100)} className="w-full" />
+                  
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      ${totalBudgetSpent.toLocaleString()} spent
+                    </span>
+                    <span className={totalBudgetRemaining >= 0 ? 'text-success' : 'text-destructive'}>
+                      ${Math.abs(totalBudgetRemaining).toLocaleString()} {totalBudgetRemaining >= 0 ? 'left' : 'over'}
+                    </span>
+                  </div>
+                  
+                  <div className="text-xs text-muted-foreground">
+                    Total Allocated: ${totalBudgetAllocated.toLocaleString()}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
           <CategoryBreakdown />
         </div>
