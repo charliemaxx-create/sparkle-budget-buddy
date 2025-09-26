@@ -1,14 +1,16 @@
 import { readJson, writeJson } from "@/services/storage";
+import type { CurrencyCode } from "@/types"; // Import CurrencyCode
 
 export interface DebtItem {
   id: string;
   name: string;
   type: 'credit_card' | 'loan' | 'student_loan' | 'mortgage' | string;
   balance: number;
-  originalAmount: number; // Added originalAmount
+  originalAmount: number;
   interestRate: number; // APR percent, e.g., 18.99
   minimumPayment: number;
   nextPaymentDate?: string; // ISO date
+  currency: CurrencyCode; // Added currency
 }
 
 const KEY = 'debts';

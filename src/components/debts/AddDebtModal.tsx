@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { DebtItem } from '@/services/debts';
+import type { CurrencyCode } from '@/types';
+import { currencyCodes } from '@/utils/currency'; // Import currencyCodes
 
 interface AddDebtModalProps {
   isOpen: boolean;
@@ -26,10 +28,12 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
   const [name, setName] = useState('');
   const [type, setType] = useState<DebtItem['type']>('credit_card');
   const [balance, setBalance] = useState('');
+  const [originalAmount, setOriginalAmount] = useState(''); // New state for original amount
   const [interestRate, setInterestRate] = useState('');
   const [minimumPayment, setMinimumPayment] = useState('');
   const [nextPaymentDate, setNextPaymentDate] = useState('');
   const [description, setDescription] = useState('');
+  const [currency, setCurrency] = useState<CurrencyCode>('USD'); // New currency state
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,9 +48,11 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
         name: name.trim(),
         type,
         balance: Number(balance),
+        originalAmount: Number(originalAmount || balance), // Use balance if originalAmount not provided
         interestRate: Number(interestRate),
         minimumPayment: Number(minimumPayment),
         nextPaymentDate: nextPaymentDate || undefined,
+        currency, // Pass currency
       });
     }
 
@@ -57,10 +63,12 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
     setName('');
     setType('credit_card');
     setBalance('');
+    setOriginalAmount('');
     setInterestRate('');
     setMinimumPayment('');
     setNextPaymentDate('');
     setDescription('');
+    setCurrency('USD'); // Reset currency
     onClose();
   };
 
@@ -112,7 +120,21 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
                 required
               />
             </div>
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="originalAmount">Original Amount</Label>
+              <Input
+                id="originalAmount"
+                type="number"
+                placeholder="0.00"
+                value={originalAmount}
+                onChange={(e) => setOriginalAmount(e.target.value)}
+                min="0.01"
+                step="0.01"
+              />
+            </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <div className="grid w-full gap-1.5">
               <Label htmlFor="interestRate">Interest Rate (APR %) *</Label>
               <Input
@@ -125,6 +147,21 @@ export const AddDebtModal = ({ isOpen, onClose, onAdd }: AddDebtModalProps) => {
                 step="0.01"
                 required
               />
+            </div>
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="currency">Currency *</Label>
+              <Select value={currency} onValueChange={(value: CurrencyCode) => setCurrency(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencyCodes.map((cc) => (
+                    <SelectItem key={cc.value} value={cc.value}>
+                      {cc.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

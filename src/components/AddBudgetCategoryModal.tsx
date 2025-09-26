@@ -5,11 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { BudgetItem } from '@/services/budgets';
+import type { CurrencyCode } from '@/types';
+import { currencyCodes } from '@/utils/currency'; // Import currencyCodes
 
 interface AddBudgetCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (budget: Omit<BudgetItem, 'id' | 'spent' | 'color' | 'icon'> & { id?: string; icon: string; color: string }) => void;
+  onSave: (budget: Omit<BudgetItem, 'id' | 'spent' | 'color' | 'icon'> & { id?: string; icon: string; color: string; currency: CurrencyCode }) => void;
   initialData?: BudgetItem | null;
 }
 
@@ -38,6 +40,7 @@ export const AddBudgetCategoryModal = ({ isOpen, onClose, onSave, initialData }:
   const [allocated, setAllocated] = useState('');
   const [icon, setIcon] = useState('🍽️');
   const [color, setColor] = useState('#10B981');
+  const [currency, setCurrency] = useState<CurrencyCode>('USD'); // New currency state
 
   useEffect(() => {
     if (initialData) {
@@ -45,11 +48,13 @@ export const AddBudgetCategoryModal = ({ isOpen, onClose, onSave, initialData }:
       setAllocated(initialData.allocated.toString());
       setIcon(initialData.icon);
       setColor(initialData.color);
+      setCurrency(initialData.currency);
     } else {
       setName('');
       setAllocated('');
       setIcon('🍽️');
       setColor('#10B981');
+      setCurrency('USD');
     }
   }, [initialData, isOpen]);
 
@@ -67,6 +72,7 @@ export const AddBudgetCategoryModal = ({ isOpen, onClose, onSave, initialData }:
       allocated: Number(allocated),
       icon,
       color,
+      currency, // Pass currency
     });
 
     onClose();
@@ -99,18 +105,35 @@ export const AddBudgetCategoryModal = ({ isOpen, onClose, onSave, initialData }:
             </Select>
           </div>
 
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="allocated">Allocated Amount *</Label>
-            <Input
-              id="allocated"
-              type="number"
-              placeholder="0.00"
-              value={allocated}
-              onChange={(e) => setAllocated(e.target.value)}
-              min="0.01"
-              step="0.01"
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="allocated">Allocated Amount *</Label>
+              <Input
+                id="allocated"
+                type="number"
+                placeholder="0.00"
+                value={allocated}
+                onChange={(e) => setAllocated(e.target.value)}
+                min="0.01"
+                step="0.01"
+                required
+              />
+            </div>
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="currency">Currency *</Label>
+              <Select value={currency} onValueChange={(value: CurrencyCode) => setCurrency(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencyCodes.map((cc) => (
+                    <SelectItem key={cc.value} value={cc.value}>
+                      {cc.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex gap-4">

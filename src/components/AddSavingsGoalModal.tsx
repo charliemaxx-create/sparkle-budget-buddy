@@ -3,8 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import type { CurrencyCode } from '@/types';
+import { currencyCodes } from '@/utils/currency'; // Import currencyCodes
 
 interface AddSavingsGoalModalProps {
   isOpen: boolean;
@@ -17,6 +19,7 @@ interface AddSavingsGoalModalProps {
     category?: string;
     icon: string;
     color: string;
+    currency: CurrencyCode; // Added currency
   }) => void;
 }
 
@@ -54,6 +57,7 @@ export const AddSavingsGoalModal = ({ isOpen, onClose, onAdd }: AddSavingsGoalMo
   const [category, setCategory] = useState('');
   const [icon, setIcon] = useState('🎯');
   const [color, setColor] = useState('#10B981');
+  const [currency, setCurrency] = useState<CurrencyCode>('USD'); // New currency state
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +74,8 @@ export const AddSavingsGoalModal = ({ isOpen, onClose, onAdd }: AddSavingsGoalMo
         target_date: targetDate || undefined,
         category: category || undefined,
         icon,
-        color
+        color,
+        currency, // Pass currency
       });
     }
 
@@ -82,6 +87,7 @@ export const AddSavingsGoalModal = ({ isOpen, onClose, onAdd }: AddSavingsGoalMo
     setCategory('');
     setIcon('🎯');
     setColor('#10B981');
+    setCurrency('USD'); // Reset currency
     onClose();
   };
 
@@ -93,6 +99,7 @@ export const AddSavingsGoalModal = ({ isOpen, onClose, onAdd }: AddSavingsGoalMo
     setCategory('');
     setIcon('🎯');
     setColor('#10B981');
+    setCurrency('USD'); // Reset currency
     onClose();
   };
 
@@ -125,18 +132,35 @@ export const AddSavingsGoalModal = ({ isOpen, onClose, onAdd }: AddSavingsGoalMo
             />
           </div>
 
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="targetAmount">Target Amount *</Label>
-            <Input
-              id="targetAmount"
-              type="number"
-              placeholder="0.00"
-              value={targetAmount}
-              onChange={(e) => setTargetAmount(e.target.value)}
-              min="0"
-              step="0.01"
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="targetAmount">Target Amount *</Label>
+              <Input
+                id="targetAmount"
+                type="number"
+                placeholder="0.00"
+                value={targetAmount}
+                onChange={(e) => setTargetAmount(e.target.value)}
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+            <div className="grid w-full gap-1.5">
+              <Label htmlFor="currency">Currency *</Label>
+              <Select value={currency} onValueChange={(value: CurrencyCode) => setCurrency(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencyCodes.map((cc) => (
+                    <SelectItem key={cc.value} value={cc.value}>
+                      {cc.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid w-full gap-1.5">

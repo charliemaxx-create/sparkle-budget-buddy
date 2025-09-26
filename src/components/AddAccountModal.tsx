@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Account, AccountType, CurrencyCode } from '@/types';
+import { currencyCodes } from '@/utils/currency'; // Import currencyCodes
 
 interface AddAccountModalProps {
   isOpen: boolean;
@@ -21,16 +22,6 @@ const accountTypes: { value: AccountType; label: string }[] = [
   { value: 'investment', label: 'Investment Account' },
   { value: 'loan', label: 'Loan Account' },
   { value: 'liability', label: 'Liability Account' },
-];
-
-const currencyCodes: { value: CurrencyCode; label: string }[] = [
-  { value: 'USD', label: 'USD - US Dollar' },
-  { value: 'EUR', label: 'EUR - Euro' },
-  { value: 'GBP', label: 'GBP - British Pound' },
-  { value: 'CAD', label: 'CAD - Canadian Dollar' },
-  { value: 'AUD', label: 'AUD - Australian Dollar' },
-  { value: 'JPY', label: 'JPY - Japanese Yen' },
-  { value: 'NGN', label: 'NGN - Nigerian Naira' },
 ];
 
 export const AddAccountModal = ({ isOpen, onClose, onSave, initialData }: AddAccountModalProps) => {

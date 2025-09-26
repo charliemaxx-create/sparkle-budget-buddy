@@ -24,7 +24,7 @@ export function seedMockData(): void {
     });
     mockDb.upsertAccount({
       name: "Travel Credit Card",
-      type: "credit_card", // Updated type
+      type: "credit_card",
       currency: "USD",
       balance: -1250.25,
       institution: "Chase",
@@ -39,9 +39,9 @@ export function seedMockData(): void {
     mockDb.upsertAccount({
       name: "Investment Portfolio",
       type: "investment",
-      currency: "USD",
-      balance: 25000.00,
-      institution: "Fidelity",
+      currency: "EUR", // Example of a different currency
+      balance: 20000.00,
+      institution: "Fidelity Europe",
     });
     mockDb.upsertAccount({
       name: "Mortgage Loan",
@@ -52,8 +52,8 @@ export function seedMockData(): void {
     });
     mockDb.upsertAccount({
       name: "Personal Liability",
-      type: "liability", // New type
-      currency: "USD",
+      type: "liability",
+      currency: "GBP", // Example of a different currency
       balance: -500.00,
       institution: "Friend",
     });
@@ -61,10 +61,11 @@ export function seedMockData(): void {
 
   const budgets = listBudgets();
   if (budgets.length === 0) {
-    upsertBudget({ category: 'Food & Dining', allocated: 800, spent: 645, icon: '🍽️', color: '#10B981' });
-    upsertBudget({ category: 'Transportation', allocated: 400, spent: 320, icon: '🚗', color: '#6366F1' });
-    upsertBudget({ category: 'Entertainment', allocated: 300, spent: 380, icon: '🎬', color: '#F59E0B' });
-    upsertBudget({ category: 'Shopping', allocated: 500, spent: 290, icon: '🛍️', color: '#EF4444' });
+    upsertBudget({ category: 'Food & Dining', allocated: 800, spent: 645, icon: '🍽️', color: '#10B981', currency: 'USD' });
+    upsertBudget({ category: 'Transportation', allocated: 400, spent: 320, icon: '🚗', color: '#6366F1', currency: 'USD' });
+    upsertBudget({ category: 'Entertainment', allocated: 300, spent: 380, icon: '🎬', color: '#F59E0B', currency: 'USD' });
+    upsertBudget({ category: 'Shopping', allocated: 500, spent: 290, icon: '🛍️', color: '#EF4444', currency: 'USD' });
+    upsertBudget({ category: 'European Travel', allocated: 1000, spent: 200, icon: '✈️', color: '#06B6D4', currency: 'EUR' });
   }
 
   const recurring = listRecurring();
@@ -79,6 +80,7 @@ export function seedMockData(): void {
       start_date: new Date().toISOString(),
       is_active: true,
       last_executed_date: undefined,
+      currency: 'USD',
     });
     upsertRecurring({
       name: 'Rent',
@@ -90,6 +92,31 @@ export function seedMockData(): void {
       start_date: new Date().toISOString(),
       is_active: true,
       last_executed_date: undefined,
+      currency: 'USD',
+    });
+    upsertRecurring({
+      name: 'Gym Membership',
+      description: 'Monthly gym fee',
+      amount: 50,
+      type: 'expense',
+      category: 'Healthcare',
+      frequency: 'monthly',
+      start_date: new Date().toISOString(),
+      is_active: true,
+      last_executed_date: undefined,
+      currency: 'USD',
+    });
+    upsertRecurring({
+      name: 'Freelance Income (EUR)',
+      description: 'Monthly freelance payment from EU client',
+      amount: 1000,
+      type: 'income',
+      category: 'Freelance',
+      frequency: 'monthly',
+      start_date: new Date().toISOString(),
+      is_active: true,
+      last_executed_date: undefined,
+      currency: 'EUR',
     });
   }
 
@@ -123,6 +150,7 @@ export function seedMockData(): void {
       icon: '🛡️',
       color: '#10B981',
       is_active: true,
+      currency: 'USD',
     });
     upsertGoal({
       name: 'Vacation to Europe',
@@ -134,13 +162,27 @@ export function seedMockData(): void {
       icon: '✈️',
       color: '#6366F1',
       is_active: true,
+      currency: 'EUR', // Example of a different currency
+    });
+    upsertGoal({
+      name: 'New Car Down Payment',
+      description: 'Saving for a new car',
+      target_amount: 10000,
+      current_amount: 3000,
+      target_date: undefined,
+      category: 'Car',
+      icon: '🚗',
+      color: '#F97316',
+      is_active: true,
+      currency: 'USD',
     });
   }
 
   const debts = listDebts();
   if (debts.length === 0) {
-    upsertDebt({ name: 'Credit Card', type: 'credit_card', balance: 3250.75, originalAmount: 5000, interestRate: 18.99, minimumPayment: 125, nextPaymentDate: undefined });
-    upsertDebt({ name: 'Student Loan', type: 'student_loan', balance: 12450.50, originalAmount: 15000, interestRate: 4.5, minimumPayment: 280, nextPaymentDate: undefined });
-    upsertDebt({ name: 'Auto Loan', type: 'loan', balance: 8400, originalAmount: 10000, interestRate: 6.9, minimumPayment: 260, nextPaymentDate: undefined });
+    upsertDebt({ name: 'Credit Card', type: 'credit_card', balance: 3250.75, originalAmount: 5000, interestRate: 18.99, minimumPayment: 125, nextPaymentDate: undefined, currency: 'USD' });
+    upsertDebt({ name: 'Student Loan', type: 'student_loan', balance: 12450.50, originalAmount: 15000, interestRate: 4.5, minimumPayment: 280, nextPaymentDate: undefined, currency: 'USD' });
+    upsertDebt({ name: 'Auto Loan', type: 'loan', balance: 8400, originalAmount: 10000, interestRate: 6.9, minimumPayment: 260, nextPaymentDate: undefined, currency: 'USD' });
+    upsertDebt({ name: 'Personal Loan (GBP)', type: 'personal_loan', balance: 750, originalAmount: 1000, interestRate: 12.0, minimumPayment: 50, nextPaymentDate: undefined, currency: 'GBP' });
   }
 }
