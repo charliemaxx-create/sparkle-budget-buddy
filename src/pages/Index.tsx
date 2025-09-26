@@ -21,8 +21,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, TrendingDown, DollarSign, Target, RotateCcw } from 'lucide-react';
-import { useDebts, useUpsertDebt } from '@/hooks/useDebts';
+import { useDebts, useUpsertDebt, useDeleteDebt } from '@/hooks/useDebts'; // Import useDeleteDebt
 import { AddDebtModal } from '@/components/debts/AddDebtModal';
+import type { DebtItem } from '@/services/debts'; // Import DebtItem type
 
 // Mock data
 const accounts = [
@@ -49,6 +50,7 @@ const Index = () => {
   const [isAddSavingsGoalOpen, setIsAddSavingsGoalOpen] = useState(false);
   const [isAddRecurringTransactionOpen, setIsAddRecurringTransactionOpen] = useState(false);
   const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
+  const [editingDebt, setEditingDebt] = useState<DebtItem | null>(null); // State for editing debt
 
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
   
@@ -61,10 +63,30 @@ const Index = () => {
   const toggleRecurring = useToggleRecurring();
   const { data: debts = [] } = useDebts(); // Fetch debts using hook
   const upsertDebt = useUpsertDebt(); // Hook for adding/updating debts
+  const deleteDebt = useDeleteDebt(); // Hook for deleting debts
 
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const totalBudgetSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
   const totalBudgetAllocated = budgets.reduce((sum, b) => sum + b.allocated, 0);
+
+  const handleEditDebt = (id: string) => {
+    const debtToEdit = debts.find(d => d.id === id);
+    if (debtToEdit) {
+      setEditingDebt(debtToEdit);
+      setIsAddDebtOpen(true);
+    }
+  };
+
+  const handleDeleteDebt = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this debt?')) {
+      deleteDebt.mutate(id);
+    }
+  };
+
+  const handleCloseDebtModal = () => {
+    setIsAddDebtOpen(false);
+    setEditingDebt(null); // Clear editing state
+  };
 
   const renderDashboard = () => (
     <div className="space-y-6">
@@ -177,7 +199,12 @@ const Index = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {debts.map((debt) => (
-          <DebtCard key={debt.id} debt={debt} />
+          <DebtCard 
+            key={debt.id} 
+            debt={debt} 
+            onEdit={handleEditDebt}
+            onDelete={handleDeleteDebt}
+          />
         ))}
       </div>
       <DebtPlanner />
@@ -343,9 +370,9 @@ const Index = () => {
 
       <AddDebtModal
         isOpen={isAddDebtOpen}
-        onClose={() => setIsAddDebtOpen(false)}
+        onClose={handleCloseDebtModal}
         onAdd={(debt) => {
-          upsertDebt.mutate(debt);
+          upsertDebt.mutate({ ...debt, id: editingDebt?.id }); // Use existing ID if editing
         }}
       />
     </div>
