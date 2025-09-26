@@ -27,8 +27,7 @@ import { AddAccountModal } from '@/components/AddAccountModal';
 import { useAccounts, useUpsertAccount } from '@/hooks/useAccounts';
 import type { DebtItem } from '@/services/debts';
 import type { Account } from '@/types';
-import { AccountsPage } from './AccountsPage';
-import { ProfileSettings } from '@/components/ProfileSettings'; // Import ProfileSettings
+import { AccountsPage } from './AccountsPage'; // Import the new AccountsPage
 
 const spendingData = [
   { category: 'Food & Dining', amount: 645, color: '#10B981' },
@@ -301,12 +300,27 @@ const Index = () => {
   };
 
   const renderProfile = () => (
-    <ProfileSettings />
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Profile & Settings</h2>
+      <Card className="card-elevated animate-fade-in">
+        <CardHeader>
+          <CardTitle>Account Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-muted-foreground">
+            <p>Profile settings and preferences will be available here.</p>
+            <p className="mt-2 text-sm">
+              For backend features like authentication, please connect to Supabase.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 
   const renderActiveTab = () => {
     switch (activeTab) {
-      case 'accounts':
+      case 'accounts': // Render AccountsPage for the 'accounts' tab
         return <AccountsPage />;
       case 'budgets':
         return renderBudgets();
@@ -366,6 +380,7 @@ const Index = () => {
         }}
       />
 
+      {/* AddAccountModal is now managed within AccountsPage, but keeping it here for other potential uses if needed */}
       <AddAccountModal
         isOpen={isAddAccountOpen}
         onClose={handleCloseAccountModal}
