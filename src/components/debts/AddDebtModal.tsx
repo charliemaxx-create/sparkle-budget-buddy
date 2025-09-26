@@ -10,7 +10,7 @@ import type { DebtItem } from '@/services/debts';
 interface AddDebtModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd?: (debt: Omit<DebtItem, 'id'>) => void;
+  onAdd?: (debt: Omit<DebtItem, 'id' | 'originalAmount'>) => void; // Adjusted type
 }
 
 const debtTypes = [
