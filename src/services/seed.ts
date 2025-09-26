@@ -4,6 +4,7 @@ import { listRecurring, upsertRecurring } from "@/services/recurring";
 import { listRules, upsertRule } from "@/services/rules";
 import { listGoals, upsertGoal } from "@/services/goals";
 import { listDebts, upsertDebt } from "@/services/debts";
+import { getUserPreferences, upsertUserPreferences } from "@/services/preferences"; // Import preferences service
 
 export function seedMockData(): void {
   const accounts = mockDb.listAccounts();
@@ -24,7 +25,7 @@ export function seedMockData(): void {
     });
     mockDb.upsertAccount({
       name: "Travel Credit Card",
-      type: "credit_card", // Updated type
+      type: "credit_card",
       currency: "USD",
       balance: -1250.25,
       institution: "Chase",
@@ -52,7 +53,7 @@ export function seedMockData(): void {
     });
     mockDb.upsertAccount({
       name: "Personal Liability",
-      type: "liability", // New type
+      type: "liability",
       currency: "USD",
       balance: -500.00,
       institution: "Friend",
@@ -142,5 +143,17 @@ export function seedMockData(): void {
     upsertDebt({ name: 'Credit Card', type: 'credit_card', balance: 3250.75, originalAmount: 5000, interestRate: 18.99, minimumPayment: 125, nextPaymentDate: undefined });
     upsertDebt({ name: 'Student Loan', type: 'student_loan', balance: 12450.50, originalAmount: 15000, interestRate: 4.5, minimumPayment: 280, nextPaymentDate: undefined });
     upsertDebt({ name: 'Auto Loan', type: 'loan', balance: 8400, originalAmount: 10000, interestRate: 6.9, minimumPayment: 260, nextPaymentDate: undefined });
+  }
+
+  // Seed user preferences if not already present
+  const preferences = getUserPreferences();
+  if (!preferences || preferences.id === "default-user") { // Check if it's the initial default
+    upsertUserPreferences({
+      id: "default-user",
+      defaultCurrency: "USD",
+      locale: "en-US",
+      weekStartsOn: 0, // Sunday
+      theme: "system",
+    });
   }
 }
