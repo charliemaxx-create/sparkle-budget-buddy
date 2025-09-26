@@ -8,7 +8,10 @@ import { BudgetCard } from '../BudgetCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Settings, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Settings, TrendingUp, Plus, Edit, Trash2 } from 'lucide-react';
+import { AddBudgetCategoryModal } from '../AddBudgetCategoryModal'; // Import the new modal
+import { useUpsertBudget, useDeleteBudget } from '@/hooks/useBudgets'; // Import hooks for budget actions
+import type { BudgetItem } from '@/services/budgets';
 
 type BudgetStrategyType = '50-30-20' | 'envelope' | 'pay-yourself-first' | 'expense-buckets' | 'traditional' | null;
 
@@ -28,10 +31,35 @@ export const BudgetStrategyManager = ({ budgets = [] }: BudgetStrategyManagerPro
   const [selectedStrategy, setSelectedStrategy] = useState<BudgetStrategyType>('traditional');
   const [monthlyIncome, setMonthlyIncome] = useState(5000); // Default income
   const [showSelector, setShowSelector] = useState(false);
+  const [isAddBudgetModalOpen, setIsAddBudgetModalOpen] = useState(false);
+  const [editingBudget, setEditingBudget] = useState<BudgetItem | null>(null);
+
+  const upsertBudget = useUpsertBudget();
+  const deleteBudget = useDeleteBudget();
 
   const handleStrategyChange = (strategyType: string) => {
     setSelectedStrategy(strategyType as BudgetStrategyType);
     setShowSelector(false);
+  };
+
+  const handleSaveBudget = (budget: Omit<BudgetItem, 'spent'> & { id?: string }) => {
+    upsertBudget.mutate({ ...budget, spent: budget.id ? (budgets.find(b => b.id === budget.id)?.spent || 0) : 0 });
+    setEditingBudget(null);
+    setIsAddBudgetModalOpen(false);
+  };
+
+  const handleEditBudget = (id: string) => {
+    const budgetToEdit = budgets.find(b => b.id === id);
+    if (budgetToEdit) {
+      setEditingBudget(budgetToEdit);
+      setIsAddBudgetModalOpen(true);
+    }
+  };
+
+  const handleDeleteBudget = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this budget category?')) {
+      deleteBudget.mutate(id);
+    }
   };
 
   const getStrategyInfo = (strategy: BudgetStrategyType) => {
@@ -114,9 +142,36 @@ export const BudgetStrategyManager = ({ budgets = [] }: BudgetStrategyManagerPro
             </Card>
 
             {/* Traditional Budget Cards */}
+            <div className="flex justify-end mb-4">
+              <Button className="btn-gradient" onClick={() => {
+                setEditingBudget(null);
+                setIsAddBudgetModalOpen(true);
+              }}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Budget Category
+              </Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {budgets.map((budget) => (
-                <BudgetCard key={budget.id} budget={budget} />
+                <Card key={budget.id} className="card-elevated animate-fade-in">
+                  <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center">
+                      <span className="text-lg mr-2">{budget.icon}</span>
+                      {budget.category}
+                    </CardTitle>
+                    <div className="flex items-center space-x-2">
+                      <Button size="sm" variant="outline" onClick={() => handleEditBudget(budget.id)}>
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => handleDeleteBudget(budget.id)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <BudgetCard budget={budget} />
+                  </CardContent>
+                </Card>
               ))}
             </div>
 
@@ -128,7 +183,10 @@ export const BudgetStrategyManager = ({ budgets = [] }: BudgetStrategyManagerPro
                   <p className="text-muted-foreground mb-4">
                     Create your first budget category to start tracking your expenses.
                   </p>
-                  <Button className="btn-gradient">
+                  <Button className="btn-gradient" onClick={() => {
+                    setEditingBudget(null);
+                    setIsAddBudgetModalOpen(true);
+                  }}>
                     Add Budget Category
                   </Button>
                 </CardContent>
@@ -167,6 +225,13 @@ export const BudgetStrategyManager = ({ budgets = [] }: BudgetStrategyManagerPro
 
       {/* Strategy Content */}
       {renderStrategy()}
+
+      <AddBudgetCategoryModal
+        isOpen={isAddBudgetModalOpen}
+        onClose={() => setIsAddBudgetModalOpen(false)}
+        onSave={handleSaveBudget}
+        initialData={editingBudget}
+      />
     </div>
   );
 };
