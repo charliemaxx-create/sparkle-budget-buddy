@@ -4,9 +4,8 @@ import { listRecurring, upsertRecurring } from "@/services/recurring";
 import { listRules, upsertRule } from "@/services/rules";
 import { listGoals, upsertGoal } from "@/services/goals";
 import { listDebts, upsertDebt } from "@/services/debts";
-import { supabase } from "@/integrations/supabase/client";
 
-export async function seedMockData(): Promise<void> {
+export function seedMockData(): void {
   const accounts = mockDb.listAccounts();
   if (accounts.length === 0) {
     mockDb.upsertAccount({
@@ -108,41 +107,5 @@ export async function seedMockData(): Promise<void> {
     upsertDebt({ name: 'Credit Card', type: 'credit_card', balance: 3250.75, originalAmount: 5000, interestRate: 18.99, minimumPayment: 125, nextPaymentDate: undefined });
     upsertDebt({ name: 'Student Loan', type: 'student_loan', balance: 12450.50, originalAmount: 15000, interestRate: 4.5, minimumPayment: 280, nextPaymentDate: undefined });
     upsertDebt({ name: 'Auto Loan', type: 'loan', balance: 8400, originalAmount: 10000, interestRate: 6.9, minimumPayment: 260, nextPaymentDate: undefined });
-  }
-
-  // Seed 50-30-20 budget strategy and allocations
-  const { data: existingStrategy } = await supabase
-    .from('budget_strategies')
-    .select('*')
-    .eq('strategy_type', '50-30-20')
-    .single();
-
-  if (!existingStrategy) {
-    const { data: newStrategy, error: strategyError } = await supabase
-      .from('budget_strategies')
-      .insert({
-        name: '50-30-20 Rule',
-        strategy_type: '50-30-20',
-        is_active: true,
-        monthly_income: 5000,
-      })
-      .select()
-      .single();
-
-    if (strategyError) {
-      console.error('Error seeding 50-30-20 strategy:', strategyError);
-    } else if (newStrategy) {
-      const defaultAllocations = [
-        { category_name: 'Needs', percentage_of_income: 0.50, allocated_amount: 5000 * 0.50, spent_amount: 0, remaining_amount: 5000 * 0.50, category_type: '50-30-20', strategy_id: newStrategy.id },
-        { category_name: 'Wants', percentage_of_income: 0.30, allocated_amount: 5000 * 0.30, spent_amount: 0, remaining_amount: 5000 * 0.30, category_type: '50-30-20', strategy_id: newStrategy.id },
-        { category_name: 'Savings', percentage_of_income: 0.20, allocated_amount: 5000 * 0.20, spent_amount: 0, remaining_amount: 5000 * 0.20, category_type: '50-30-20', strategy_id: newStrategy.id },
-      ];
-      const { error: allocationsError } = await supabase
-        .from('budget_allocations')
-        .insert(defaultAllocations);
-      if (allocationsError) {
-        console.error('Error seeding 50-30-20 allocations:', allocationsError);
-      }
-    }
   }
 }
