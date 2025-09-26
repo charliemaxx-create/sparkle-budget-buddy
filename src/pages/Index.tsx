@@ -21,6 +21,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, TrendingDown, DollarSign, Target, RotateCcw } from 'lucide-react';
+import { useDebts, useUpsertDebt } from '@/hooks/useDebts';
+import { AddDebtModal } from '@/components/debts/AddDebtModal';
 
 // Mock data
 const accounts = [
@@ -31,29 +33,7 @@ const accounts = [
 ];
 
 // Budgets now loaded from storage via hook
-
-const debts = [
-  {
-    id: '1',
-    name: 'Credit Card',
-    type: 'credit_card' as const,
-    balance: 3250.75,
-    originalAmount: 5000,
-    interestRate: 18.99,
-    minimumPayment: 125,
-    nextPaymentDate: 'Dec 15, 2024'
-  },
-  {
-    id: '2',
-    name: 'Student Loan',
-    type: 'student_loan' as const,
-    balance: 12450.50,
-    originalAmount: 25000,
-    interestRate: 4.5,
-    minimumPayment: 280,
-    nextPaymentDate: 'Dec 20, 2024'
-  }
-];
+// Debts now loaded from storage via hook
 
 const spendingData = [
   { category: 'Food & Dining', amount: 645, color: '#10B981' },
@@ -68,9 +48,10 @@ const Index = () => {
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
   const [isAddSavingsGoalOpen, setIsAddSavingsGoalOpen] = useState(false);
   const [isAddRecurringTransactionOpen, setIsAddRecurringTransactionOpen] = useState(false);
+  const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
 
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
-  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
+  
   const { data: budgets = [] } = useBudgets();
   const { data: savingsGoals = [] } = useGoals();
   const upsertGoal = useUpsertGoal();
@@ -78,6 +59,10 @@ const Index = () => {
   const upsertRecurring = useUpsertRecurring();
   const delRecurring = useDeleteRecurring();
   const toggleRecurring = useToggleRecurring();
+  const { data: debts = [] } = useDebts(); // Fetch debts using hook
+  const upsertDebt = useUpsertDebt(); // Hook for adding/updating debts
+
+  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const totalBudgetSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
   const totalBudgetAllocated = budgets.reduce((sum, b) => sum + b.allocated, 0);
 
@@ -188,7 +173,7 @@ const Index = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Debt Management</h2>
-        <Button className="btn-gradient">Add Debt</Button>
+        <Button className="btn-gradient" onClick={() => setIsAddDebtOpen(true)}>Add Debt</Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {debts.map((debt) => (
@@ -353,6 +338,14 @@ const Index = () => {
         onClose={() => setIsAddRecurringTransactionOpen(false)}
         onAdd={(transaction) => {
           upsertRecurring.mutate({ ...transaction, is_active: true });
+        }}
+      />
+
+      <AddDebtModal
+        isOpen={isAddDebtOpen}
+        onClose={() => setIsAddDebtOpen(false)}
+        onAdd={(debt) => {
+          upsertDebt.mutate(debt);
         }}
       />
     </div>
