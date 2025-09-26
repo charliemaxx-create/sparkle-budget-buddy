@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { useCategories } from '@/hooks/useCategories'; // Import useCategories
+import type { TransactionType } from '@/types';
 
 interface AddRecurringTransactionModalProps {
   isOpen: boolean;
@@ -24,61 +26,6 @@ interface AddRecurringTransactionModalProps {
   }) => void;
 }
 
-const transactionCategories = {
-  expense: [
-    'Food & Dining',
-    'Groceries',
-    'Restaurants',
-    'Transportation',
-    'Fuel',
-    'Public Transport',
-    'Car Maintenance',
-    'Shopping',
-    'Clothing',
-    'Electronics',
-    'Home Goods',
-    'Entertainment',
-    'Movies & Music',
-    'Hobbies',
-    'Social Events',
-    'Bills & Utilities',
-    'Rent/Mortgage',
-    'Electricity',
-    'Water',
-    'Internet',
-    'Phone',
-    'Healthcare',
-    'Doctor Visits',
-    'Medication',
-    'Insurance',
-    'Education',
-    'Tuition',
-    'Books',
-    'Travel',
-    'Flights',
-    'Accommodation',
-    'Personal Care',
-    'Haircuts',
-    'Gym',
-    'Gifts & Donations',
-    'Pets',
-    'Childcare',
-    'Home Improvement',
-    'Debt Payments',
-    'Other'
-  ],
-  income: [
-    'Salary',
-    'Freelance',
-    'Investment',
-    'Rental',
-    'Business',
-    'Side Hustle',
-    'Gift',
-    'Other'
-  ]
-};
-
 const frequencies = [
   { value: 'daily', label: 'Daily' },
   { value: 'weekly', label: 'Weekly' },
@@ -92,13 +39,20 @@ export const AddRecurringTransactionModal = ({ isOpen, onClose, onAdd }: AddRecu
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [type, setType] = useState<'income' | 'expense'>('expense');
+  const [type, setType] = useState<TransactionType>('expense');
   const [category, setCategory] = useState('');
   const [frequency, setFrequency] = useState<'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'quarterly' | 'yearly'>('monthly');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [hasEndDate, setHasEndDate] = useState(false);
   const [endDate, setEndDate] = useState('');
   const [tags, setTags] = useState('');
+
+  const { data: categories = [] } = useCategories(); // Fetch categories
+
+  useEffect(() => {
+    // Reset category when transaction type changes
+    setCategory('');
+  }, [type]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +90,21 @@ export const AddRecurringTransactionModal = ({ isOpen, onClose, onAdd }: AddRecu
     setEndDate('');
     setTags('');
     onClose();
+  };
+
+  const getCategoryOptions = (transactionType: TransactionType) => {
+    const filteredCategories = categories.filter(cat => cat.type === transactionType);
+    const parentCategories = filteredCategories.filter(cat => cat.parent_id === null);
+    const categoryOptions: { id: string; name: string; type: string }[] = [];
+
+    parentCategories.forEach(parent => {
+      categoryOptions.push({ id: parent.id, name: parent.name, type: parent.type });
+      filteredCategories.filter(child => child.parent_id === parent.id)
+        .forEach(child => {
+          categoryOptions.push({ id: child.id, name: `${parent.name} > ${child.name}`, type: child.type });
+        });
+    });
+    return categoryOptions;
   };
 
   return (
@@ -186,7 +155,6 @@ export const AddRecurringTransactionModal = ({ isOpen, onClose, onAdd }: AddRecu
               <Label htmlFor="type">Type *</Label>
               <Select value={type} onValueChange={(value: 'income' | 'expense') => {
                 setType(value);
-                setCategory(''); // Reset category when type changes
               }}>
                 <SelectTrigger>
                   <SelectValue />
@@ -202,14 +170,14 @@ export const AddRecurringTransactionModal = ({ isOpen, onClose, onAdd }: AddRecu
           <div className="grid grid-cols-2 gap-4">
             <div className="grid w-full gap-1.5">
               <Label htmlFor="category">Category *</Label>
-              <Select value={category} onValueChange={setCategory}>
+              <Select value={category} onValueChange={setCategory} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {transactionCategories[type].map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
+                  {getCategoryOptions(type).map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

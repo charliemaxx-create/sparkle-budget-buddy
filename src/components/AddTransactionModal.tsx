@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Mail, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useCategories } from '@/hooks/useCategories'; // Import useCategories
 import type { TransactionType } from '@/types'; // Import TransactionType
 
 interface AddTransactionModalProps {
@@ -16,69 +17,15 @@ interface AddTransactionModalProps {
   onClose: () => void;
 }
 
-const transactionCategories = {
-  expense: [
-    'Food & Dining',
-    'Groceries',
-    'Restaurants',
-    'Transportation',
-    'Fuel',
-    'Public Transport',
-    'Car Maintenance',
-    'Shopping',
-    'Clothing',
-    'Electronics',
-    'Home Goods',
-    'Entertainment',
-    'Movies & Music',
-    'Hobbies',
-    'Social Events',
-    'Bills & Utilities',
-    'Rent/Mortgage',
-    'Electricity',
-    'Water',
-    'Internet',
-    'Phone',
-    'Healthcare',
-    'Doctor Visits',
-    'Medication',
-    'Insurance',
-    'Education',
-    'Tuition',
-    'Books',
-    'Travel',
-    'Flights',
-    'Accommodation',
-    'Personal Care',
-    'Haircuts',
-    'Gym',
-    'Gifts & Donations',
-    'Pets',
-    'Childcare',
-    'Home Improvement',
-    'Debt Payments',
-    'Other'
-  ],
-  income: [
-    'Salary',
-    'Freelance',
-    'Investment',
-    'Rental',
-    'Business',
-    'Side Hustle',
-    'Gift',
-    'Other'
-  ]
-};
-
 export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProps) => {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [account, setAccount] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [transactionType, setTransactionType] = useState<TransactionType>('expense'); // New state for transaction type
+  const [transactionType, setTransactionType] = useState<TransactionType>('expense');
   const { toast } = useToast();
+  const { data: categories = [] } = useCategories(); // Fetch categories
 
   // Mock accounts for now, ideally fetched from useAccounts
   const accounts = [
@@ -87,6 +34,11 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
     'Credit Card',
     'Cash'
   ];
+
+  useEffect(() => {
+    // Reset category when transaction type changes
+    setCategory('');
+  }, [transactionType]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +54,7 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
     setAccount('');
     setDescription('');
     setDate(new Date().toISOString().split('T')[0]);
-    setTransactionType('expense'); // Reset type
+    setTransactionType('expense');
     onClose();
   };
 
@@ -118,6 +70,24 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
       title: "Email Sync",
       description: "Fetching transactions from your connected email account.",
     });
+  };
+
+  const getCategoryOptions = (type: TransactionType) => {
+    if (type === 'transfer') {
+      return [{ id: 'transfer', name: 'Transfer', parent_id: null, type: 'transfer', icon: '', color: '' }]; // Mock transfer category
+    }
+    const filteredCategories = categories.filter(cat => cat.type === type);
+    const parentCategories = filteredCategories.filter(cat => cat.parent_id === null);
+    const categoryOptions: { id: string; name: string; type: string }[] = [];
+
+    parentCategories.forEach(parent => {
+      categoryOptions.push({ id: parent.id, name: parent.name, type: parent.type });
+      filteredCategories.filter(child => child.parent_id === parent.id)
+        .forEach(child => {
+          categoryOptions.push({ id: child.id, name: `${parent.name} > ${child.name}`, type: child.type });
+        });
+    });
+    return categoryOptions;
   };
 
   return (
@@ -163,10 +133,9 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="type">Type</Label> {/* New Type Selector */}
+                  <Label htmlFor="type">Type</Label>
                   <Select value={transactionType} onValueChange={(value: TransactionType) => {
                     setTransactionType(value);
-                    setCategory(''); // Reset category when type changes
                   }} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
@@ -185,15 +154,11 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {transactionType === 'transfer' ? (
-                        <SelectItem value="Transfer">Transfer</SelectItem>
-                      ) : (
-                        transactionCategories[transactionType]?.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
-                          </SelectItem>
-                        ))
-                      )}
+                      {getCategoryOptions(transactionType).map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

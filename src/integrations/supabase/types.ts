@@ -106,6 +106,50 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          parent_id: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          parent_id?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          parent_id?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       envelope_budgets: {
         Row: {
           allocated_amount: number
@@ -274,6 +318,14 @@ export type Database = {
     Functions: {
       calculate_next_execution_date: {
         Args: { current_date_param: string; frequency_param: string }
+        Returns: string
+      }
+      update_updated_at_column: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      update_budget_allocation_remaining: {
+        Args: Record<PropertyKey, never>
         Returns: string
       }
     }
