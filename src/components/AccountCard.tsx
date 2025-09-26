@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Wallet, CreditCard, Banknote, Landmark, PiggyBank, TrendingDown } from 'lucide-react'; // Added Landmark, PiggyBank, TrendingDown
+import { Wallet, CreditCard, Banknote, Landmark, PiggyBank, TrendingDown, TrendingUp } from 'lucide-react'; // Added TrendingUp
 
 interface Account {
   id: string;
