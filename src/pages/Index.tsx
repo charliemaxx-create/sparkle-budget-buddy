@@ -15,7 +15,7 @@ import { AddSavingsGoalModal } from '@/components/AddSavingsGoalModal';
 import { RecurringTransactionCard } from '@/components/RecurringTransactionCard';
 import { AddRecurringTransactionModal } from '@/components/AddRecurringTransactionModal';
 import { TransactionsList } from '@/components/transactions/TransactionsList';
-import { useRecurring, useDeleteRecurring, useToggleRecurring } from '@/hooks/useRecurring';
+import { useRecurring, useDeleteRecurring, useToggleRecurring, useUpsertRecurring } from '@/hooks/useRecurring';
 import { BudgetStrategyManager } from '@/components/budgeting/BudgetStrategyManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -63,67 +63,6 @@ const spendingData = [
   { category: 'Bills & Utilities', amount: 480, color: '#8B5CF6' },
 ];
 
-// Savings goals loaded via hook
-
-const recurringTransactions = [
-  {
-    id: '1',
-    name: 'Netflix Subscription',
-    description: 'Monthly streaming service',
-    amount: 15.99,
-    type: 'expense' as const,
-    category: 'Entertainment',
-    frequency: 'monthly' as const,
-    start_date: '2024-01-01',
-    next_execution_date: '2025-01-15',
-    last_executed_date: '2024-12-15',
-    is_active: true,
-    tags: ['subscription', 'entertainment']
-  },
-  {
-    id: '2',
-    name: 'Salary',
-    description: 'Monthly salary payment',
-    amount: 5000,
-    type: 'income' as const,
-    category: 'Salary',
-    frequency: 'monthly' as const,
-    start_date: '2024-01-01',
-    next_execution_date: '2025-01-31',
-    last_executed_date: '2024-12-31',
-    is_active: true,
-    tags: ['salary', 'income']
-  },
-  {
-    id: '3',
-    name: 'Rent Payment',
-    description: 'Monthly apartment rent',
-    amount: 1200,
-    type: 'expense' as const,
-    category: 'Bills & Utilities',
-    frequency: 'monthly' as const,
-    start_date: '2024-01-01',
-    next_execution_date: '2025-02-01',
-    last_executed_date: '2025-01-01',
-    is_active: true,
-    tags: ['rent', 'housing']
-  },
-  {
-    id: '4',
-    name: 'Gym Membership',
-    description: 'Annual gym membership',
-    amount: 480,
-    type: 'expense' as const,
-    category: 'Healthcare',
-    frequency: 'yearly' as const,
-    start_date: '2024-03-01',
-    next_execution_date: '2025-03-01',
-    last_executed_date: '2024-03-01',
-    is_active: false,
-    tags: ['fitness', 'health']
-  }
-];
-
 const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
@@ -133,11 +72,10 @@ const Index = () => {
   const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
   const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0);
   const { data: budgets = [] } = useBudgets();
-  // Savings goals hooks moved to top-level (not inside conditional render)
   const { data: savingsGoals = [] } = useGoals();
   const upsertGoal = useUpsertGoal();
-  // Recurring hooks moved to top-level
   const { data: recurring = [] } = useRecurring();
+  const upsertRecurring = useUpsertRecurring();
   const delRecurring = useDeleteRecurring();
   const toggleRecurring = useToggleRecurring();
   const totalBudgetSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
@@ -406,8 +344,7 @@ const Index = () => {
         isOpen={isAddSavingsGoalOpen}
         onClose={() => setIsAddSavingsGoalOpen(false)}
         onAdd={(goal) => {
-          console.log('Adding new savings goal:', goal);
-          // This will be implemented with Supabase integration
+          upsertGoal.mutate({ ...goal, is_active: true, current_amount: 0 });
         }}
       />
 
@@ -415,8 +352,7 @@ const Index = () => {
         isOpen={isAddRecurringTransactionOpen}
         onClose={() => setIsAddRecurringTransactionOpen(false)}
         onAdd={(transaction) => {
-          console.log('Adding new recurring transaction:', transaction);
-          // This will be implemented with Supabase integration
+          upsertRecurring.mutate({ ...transaction, is_active: true });
         }}
       />
     </div>
