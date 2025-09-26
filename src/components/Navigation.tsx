@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Wallet, PieChart, TrendingDown, Receipt, Settings, Plus, Target, RotateCcw, Banknote } from 'lucide-react'; // Added Banknote for accounts
+import { Wallet, PieChart, TrendingDown, Receipt, Settings, Plus, Target, Banknote } from 'lucide-react'; // Removed RotateCcw icon as Recurring is no longer a top-level item
 import { Button } from '@/components/ui/button';
 
 const navItems = [
@@ -9,7 +9,6 @@ const navItems = [
   { id: 'savings', label: 'Savings Goals', icon: Target },
   { id: 'debts', label: 'Debts', icon: TrendingDown },
   { id: 'transactions', label: 'Transactions', icon: Receipt },
-  { id: 'recurring', label: 'Recurring', icon: RotateCcw }, // Moved 'Recurring' here
   { id: 'profile', label: 'Profile', icon: Settings },
 ];
 

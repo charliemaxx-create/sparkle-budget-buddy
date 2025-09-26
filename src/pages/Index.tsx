@@ -12,15 +12,12 @@ import { AddTransactionModal } from '@/components/AddTransactionModal';
 import { SavingsGoalCard } from '@/components/SavingsGoalCard';
 import { useGoals, useUpsertGoal } from '@/hooks/useGoals';
 import { AddSavingsGoalModal } from '@/components/AddSavingsGoalModal';
-import { RecurringTransactionCard } from '@/components/RecurringTransactionCard';
-import { AddRecurringTransactionModal } from '@/components/AddRecurringTransactionModal';
 import { TransactionsList } from '@/components/transactions/TransactionsList';
-import { useRecurring, useDeleteRecurring, useToggleRecurring, useUpsertRecurring } from '@/hooks/useRecurring';
 import { BudgetStrategyManager } from '@/components/budgeting/BudgetStrategyManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, DollarSign, Target, RotateCcw, Plus } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, Target, Plus } from 'lucide-react';
 import { useDebts, useUpsertDebt, useDeleteDebt } from '@/hooks/useDebts';
 import { AddDebtModal } from '@/components/debts/AddDebtModal';
 import { AddAccountModal } from '@/components/AddAccountModal';
@@ -42,7 +39,6 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false);
   const [isAddSavingsGoalOpen, setIsAddSavingsGoalOpen] = useState(false);
-  const [isAddRecurringTransactionOpen, setIsAddRecurringTransactionOpen] = useState(false);
   const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<DebtItem | null>(null);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
@@ -56,10 +52,6 @@ const Index = () => {
   const { data: budgets = [] } = useBudgets();
   const { data: savingsGoals = [] } = useGoals();
   const upsertGoal = useUpsertGoal();
-  const { data: recurring = [] } = useRecurring();
-  const upsertRecurring = useUpsertRecurring();
-  const delRecurring = useDeleteRecurring();
-  const toggleRecurring = useToggleRecurring();
   const { data: debts = [] } = useDebts();
   const upsertDebt = useUpsertDebt();
   const deleteDebt = useDeleteDebt();
@@ -258,48 +250,6 @@ const Index = () => {
     );
   };
 
-  const renderRecurringTransactions = () => {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Recurring Transactions</h2>
-          <Button className="btn-gradient" onClick={() => setIsAddRecurringTransactionOpen(true)}>
-            Add Recurring Transaction
-          </Button>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {recurring.map((transaction) => (
-            <RecurringTransactionCard 
-              key={transaction.id} 
-              transaction={transaction as any}
-              onToggleActive={(id, active) => toggleRecurring.mutate({ id, active })}
-              onEdit={(id) => {
-                console.log(`Editing transaction ${id}`);
-              }}
-              onDelete={(id) => delRecurring.mutate(id)}
-            />
-          ))}
-        </div>
-        
-        {recurring.length === 0 && (
-          <Card className="card-elevated animate-fade-in">
-            <CardContent className="text-center py-12">
-              <RotateCcw className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No recurring transactions yet</h3>
-              <p className="text-muted-foreground mb-4">
-                Automate your finances! Set up recurring income and expenses.
-              </p>
-              <Button className="btn-gradient" onClick={() => setIsAddRecurringTransactionOpen(true)}>
-                Add Your First Recurring Transaction
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    );
-  };
-
   const renderProfile = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Profile & Settings</h2>
@@ -328,12 +278,10 @@ const Index = () => {
         return renderBudgets();
       case 'savings':
         return renderSavingsGoals();
-      case 'recurring':
-        return renderRecurringTransactions();
+      case 'transactions': // This now includes recurring transactions
+        return renderTransactions();
       case 'debts':
         return renderDebts();
-      case 'transactions':
-        return renderTransactions();
       case 'profile':
         return renderProfile();
       default:
@@ -366,13 +314,7 @@ const Index = () => {
         }}
       />
 
-      <AddRecurringTransactionModal
-        isOpen={isAddRecurringTransactionOpen}
-        onClose={() => setIsAddRecurringTransactionOpen(false)}
-        onAdd={(transaction) => {
-          upsertRecurring.mutate({ ...transaction, is_active: true });
-        }}
-      />
+      {/* Removed AddRecurringTransactionModal from here as it's now managed within RecurringTransactionsList */}
 
       <AddDebtModal
         isOpen={isAddDebtOpen}

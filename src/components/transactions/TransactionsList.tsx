@@ -5,6 +5,8 @@ import { useAccounts } from '@/hooks/useAccounts';
 import { useDeleteTransaction, useTransactions, useUpsertTransaction } from '@/hooks/useTransactions';
 import { TransactionModal } from './TransactionModal';
 import { ImportCsvModal } from './ImportCsvModal';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { RecurringTransactionsList } from './RecurringTransactionsList'; // Import the new component
 
 export function TransactionsList() {
   const { data: accounts = [] } = useAccounts();
@@ -25,56 +27,69 @@ export function TransactionsList() {
         </div>
       </div>
 
-      <Card className="card-elevated">
-        <CardHeader>
-          <CardTitle>Recent</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-muted-foreground">
-                  <th className="py-2 pr-4">Date</th>
-                  <th className="py-2 pr-4">Account</th>
-                  <th className="py-2 pr-4">Description</th>
-                  <th className="py-2 pr-4 text-right">Amount</th>
-                  <th className="py-2 pr-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {(data?.items ?? []).map(tx => {
-                  const account = accounts.find(a => a.id === tx.accountId);
-                  const amount = (tx.type === 'expense' ? -1 : 1) * tx.amount;
-                  return (
-                    <tr key={tx.id} className="border-t border-border">
-                      <td className="py-2 pr-4">{tx.dateIso.slice(0, 10)}</td>
-                      <td className="py-2 pr-4">{account?.name ?? tx.accountId}</td>
-                      <td className="py-2 pr-4">{tx.description}</td>
-                      <td className={`py-2 pr-4 text-right ${amount < 0 ? 'text-destructive' : 'text-success'}`}>
-                        {amount < 0 ? '-' : '+'}${Math.abs(tx.amount).toFixed(2)}
-                      </td>
-                      <td className="py-2 pr-4 text-right">
-                        <Button variant="outline" size="sm" onClick={() => del.mutate(tx.id)}>Delete</Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {data && data.items.length === 0 && (
-                  <tr>
-                    <td className="py-6 text-center text-muted-foreground" colSpan={5}>No transactions yet.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+      <Tabs defaultValue="all-transactions" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="all-transactions">All Transactions</TabsTrigger>
+          <TabsTrigger value="recurring-transactions">Recurring Transactions</TabsTrigger>
+        </TabsList>
 
-          <div className="flex items-center justify-between mt-4">
-            <Button variant="outline" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
-            <div className="text-xs text-muted-foreground">Page {page}</div>
-            <Button variant="outline" disabled={(data?.items.length ?? 0) < 20} onClick={() => setPage(p => p + 1)}>Next</Button>
-          </div>
-        </CardContent>
-      </Card>
+        <TabsContent value="all-transactions" className="space-y-4 mt-4">
+          <Card className="card-elevated">
+            <CardHeader>
+              <CardTitle>Recent</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-muted-foreground">
+                      <th className="py-2 pr-4">Date</th>
+                      <th className="py-2 pr-4">Account</th>
+                      <th className="py-2 pr-4">Description</th>
+                      <th className="py-2 pr-4 text-right">Amount</th>
+                      <th className="py-2 pr-4"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(data?.items ?? []).map(tx => {
+                      const account = accounts.find(a => a.id === tx.accountId);
+                      const amount = (tx.type === 'expense' ? -1 : 1) * tx.amount;
+                      return (
+                        <tr key={tx.id} className="border-t border-border">
+                          <td className="py-2 pr-4">{tx.dateIso.slice(0, 10)}</td>
+                          <td className="py-2 pr-4">{account?.name ?? tx.accountId}</td>
+                          <td className="py-2 pr-4">{tx.description}</td>
+                          <td className={`py-2 pr-4 text-right ${amount < 0 ? 'text-destructive' : 'text-success'}`}>
+                            {amount < 0 ? '-' : '+'}${Math.abs(tx.amount).toFixed(2)}
+                          </td>
+                          <td className="py-2 pr-4 text-right">
+                            <Button variant="outline" size="sm" onClick={() => del.mutate(tx.id)}>Delete</Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {data && data.items.length === 0 && (
+                      <tr>
+                        <td className="py-6 text-center text-muted-foreground" colSpan={5}>No transactions yet.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex items-center justify-between mt-4">
+                <Button variant="outline" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>Prev</Button>
+                <div className="text-xs text-muted-foreground">Page {page}</div>
+                <Button variant="outline" disabled={(data?.items.length ?? 0) < 20} onClick={() => setPage(p => p + 1)}>Next</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="recurring-transactions" className="mt-4">
+          <RecurringTransactionsList />
+        </TabsContent>
+      </Tabs>
 
       <TransactionModal
         open={open}
@@ -94,5 +109,3 @@ export function TransactionsList() {
     </div>
   );
 }
-
-
