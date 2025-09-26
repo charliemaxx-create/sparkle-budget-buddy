@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: Wallet },
-  { id: 'accounts', label: 'Accounts', icon: Banknote }, // New Accounts item
+  { id: 'accounts', label: 'Accounts', icon: Banknote },
   { id: 'budgets', label: 'Budgets', icon: PieChart },
   { id: 'savings', label: 'Savings Goals', icon: Target },
-  { id: 'recurring', label: 'Recurring', icon: RotateCcw },
   { id: 'debts', label: 'Debts', icon: TrendingDown },
   { id: 'transactions', label: 'Transactions', icon: Receipt },
+  { id: 'recurring', label: 'Recurring', icon: RotateCcw }, // Moved 'Recurring' here
   { id: 'profile', label: 'Profile', icon: Settings },
 ];
 
