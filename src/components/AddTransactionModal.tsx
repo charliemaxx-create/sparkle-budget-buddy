@@ -9,11 +9,67 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Mail, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import type { TransactionType } from '@/types'; // Import TransactionType
 
 interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const transactionCategories = {
+  expense: [
+    'Food & Dining',
+    'Groceries',
+    'Restaurants',
+    'Transportation',
+    'Fuel',
+    'Public Transport',
+    'Car Maintenance',
+    'Shopping',
+    'Clothing',
+    'Electronics',
+    'Home Goods',
+    'Entertainment',
+    'Movies & Music',
+    'Hobbies',
+    'Social Events',
+    'Bills & Utilities',
+    'Rent/Mortgage',
+    'Electricity',
+    'Water',
+    'Internet',
+    'Phone',
+    'Healthcare',
+    'Doctor Visits',
+    'Medication',
+    'Insurance',
+    'Education',
+    'Tuition',
+    'Books',
+    'Travel',
+    'Flights',
+    'Accommodation',
+    'Personal Care',
+    'Haircuts',
+    'Gym',
+    'Gifts & Donations',
+    'Pets',
+    'Childcare',
+    'Home Improvement',
+    'Debt Payments',
+    'Other'
+  ],
+  income: [
+    'Salary',
+    'Freelance',
+    'Investment',
+    'Rental',
+    'Business',
+    'Side Hustle',
+    'Gift',
+    'Other'
+  ]
+};
 
 export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProps) => {
   const [amount, setAmount] = useState('');
@@ -21,19 +77,10 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
   const [account, setAccount] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [transactionType, setTransactionType] = useState<TransactionType>('expense'); // New state for transaction type
   const { toast } = useToast();
 
-  const categories = [
-    'Food & Dining',
-    'Transportation',
-    'Shopping',
-    'Entertainment',
-    'Bills & Utilities',
-    'Healthcare',
-    'Travel',
-    'Other'
-  ];
-
+  // Mock accounts for now, ideally fetched from useAccounts
   const accounts = [
     'Chase Checking',
     'Savings Account',
@@ -46,7 +93,7 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
     
     toast({
       title: "Transaction Added",
-      description: `$${amount} transaction for ${category} has been recorded.`,
+      description: `$${amount} ${transactionType} for ${category} has been recorded.`,
     });
     
     // Reset form
@@ -55,6 +102,7 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
     setAccount('');
     setDescription('');
     setDate(new Date().toISOString().split('T')[0]);
+    setTransactionType('expense'); // Reset type
     onClose();
   };
 
@@ -115,35 +163,56 @@ export const AddTransactionModal = ({ isOpen, onClose }: AddTransactionModalProp
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
+                  <Label htmlFor="type">Type</Label> {/* New Type Selector */}
+                  <Select value={transactionType} onValueChange={(value: TransactionType) => {
+                    setTransactionType(value);
+                    setCategory(''); // Reset category when type changes
+                  }} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="expense">Expense</SelectItem>
+                      <SelectItem value="income">Income</SelectItem>
+                      <SelectItem value="transfer">Transfer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
                   <Select value={category} onValueChange={setCategory} required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
-                        </SelectItem>
-                      ))}
+                      {transactionType === 'transfer' ? (
+                        <SelectItem value="Transfer">Transfer</SelectItem>
+                      ) : (
+                        transactionCategories[transactionType]?.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="account">Account</Label>
-                  <Select value={account} onValueChange={setAccount} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select account" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {accounts.map((acc) => (
-                        <SelectItem key={acc} value={acc}>
-                          {acc}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="account">Account</Label>
+                <Select value={account} onValueChange={setAccount} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accounts.map((acc) => (
+                      <SelectItem key={acc} value={acc}>
+                        {acc}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="space-y-2">
