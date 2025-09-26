@@ -13,7 +13,7 @@ const currencyCodes: { value: CurrencyCode; label: string }[] = [
   { value: 'CAD', label: 'CAD - Canadian Dollar' },
   { value: 'AUD', label: 'AUD - Australian Dollar' },
   { value: 'JPY', label: 'JPY - Japanese Yen' },
-  { value: 'NGN', label: 'NGN - Nigerian Naira' }, // Added new currency
+  { value: 'KSH', label: 'KSH - Kenyan Shilling' }, // Replaced NGN with KSH
 ];
 
 const locales = [
